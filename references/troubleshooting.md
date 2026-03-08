@@ -107,6 +107,7 @@ Prefer:
 - what is already confirmed working
 - one next action
 - plain business language like "connection to Bitrix24" or "access to calendar"
+- doing the next safe diagnostic step yourself before asking the user anything
 
 Avoid:
 
@@ -114,6 +115,7 @@ Avoid:
 - asking for confirmation before a simple retry you can do yourself
 - exposing the webhook URL, full secret, or masked secret
 - talking about `curl`, `MCP`, JSON quoting, `.env`, DNS, or webhook mechanics unless the user explicitly wants technical details
+- multiple-choice menus like "1. retry 2. use MCP 3. run it yourself"
 
 ## Response Templates
 
@@ -144,3 +146,31 @@ Better for non-technical users asking about business tasks:
 - "Сейчас не могу получить данные из Битрикс24. Могу сам переподключить доступ и сразу повторить."
 - "Сейчас календарь Битрикс24 недоступен. Могу быстро проверить подключение и затем показать расписание."
 - "Не удалось связаться с Битрикс24. Могу сам проверить подключение и вернуться с результатом."
+
+## Autonomous Retry Rule
+
+For safe read-only requests:
+
+- run the actual request immediately
+- if it fails, run one self-check immediately
+- if that can fix the issue, retry once automatically
+- only then report the blocker
+
+Examples of safe read-only requests:
+
+- show schedule
+- show tasks
+- show deals
+- check connection
+- get current user
+
+Do not ask:
+
+- "Should I try again?"
+- "Choose option 1 or 2"
+- "Do you want me to run the test now?"
+
+Instead do the test now and return either:
+
+- the actual business result
+- or a short blocker in plain language

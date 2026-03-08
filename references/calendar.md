@@ -24,6 +24,9 @@ The current MCP server also surfaced user and resource settings methods, but the
 - Use `calendar.event.getbyid` when you already know the event ID.
 - For attendee conflicts or meeting scheduling, check `calendar.accessibility.get` before proposing a slot.
 - Keep time zone handling explicit in date-time values.
+- For user requests like "show my schedule on Tuesday", compute the exact date range yourself and query immediately.
+- Do not answer with a proposed command or a permission question when the request is read-only and safe.
+- If the first calendar call fails, do one connection check and retry once before reporting a blocker.
 
 ## Minimal Examples
 
