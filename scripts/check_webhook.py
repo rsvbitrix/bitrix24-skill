@@ -192,7 +192,6 @@ def print_plain(result: dict[str, Any]) -> None:
     for key in [
         "source",
         "url_found",
-        "masked_url",
         "format_ok",
         "host",
         "user_id",

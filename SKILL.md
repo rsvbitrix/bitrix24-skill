@@ -147,7 +147,7 @@ Important: do not guess method names from memory when the task is sensitive or t
 - In setup and troubleshooting replies, prefer 2-4 short sentences and one recommended next action, not a long checklist with multiple branches.
 - If the user provides a webhook and asks to configure Bitrix24, offer to save it to `.env` via `scripts/save_webhook.py` and then verify it immediately.
 - By default, do not show end users `curl`, `MCP`, `.env`, DNS, JSON escaping, or other implementation details. Talk about connection to Bitrix24 in plain language. Only reveal technical steps if the user explicitly asks for technical details.
-- Never echo the full webhook secret back to the user; mask it in diagnostics.
+- Do not show webhook URLs, webhook secrets, or even masked secrets in normal user-facing replies. Mention them only if the user explicitly asks for technical debugging details.
 - When the portal-specific configuration matters, verify the exact field names and examples with `bitrix-method-details`.
 - For large or cross-entity operations, prefer batch or dedicated import methods only after checking current docs in MCP.
 

@@ -37,7 +37,7 @@ When you see this:
 
 1. run the webhook check script
 2. verify whether the URL came from the environment or an env file
-3. mask the secret and show only the host and source
+3. keep the webhook itself out of the user-facing reply
 4. if DNS fails, say that clearly instead of vaguely saying "JSON formatting problem"
 
 ## Typical Failure: Missing Env
@@ -112,7 +112,7 @@ Avoid:
 
 - long generic lists of shell commands for the user
 - asking for confirmation before a simple retry you can do yourself
-- exposing the full webhook secret
+- exposing the webhook URL, full secret, or masked secret
 - talking about `curl`, `MCP`, JSON quoting, `.env`, DNS, or webhook mechanics unless the user explicitly wants technical details
 
 ## Response Templates
@@ -125,19 +125,19 @@ Bad:
 
 Better for missing env:
 
-- "Сейчас вебхук не подключен: `BITRIX24_WEBHOOK_URL` пустой. Если хочешь, я могу сам сохранить webhook в `.env` и сразу проверить связь."
+- "Сейчас доступ к Битрикс24 не подключен. Могу сам быстро настроить подключение и сразу проверить связь."
 
 Better when webhook is known from prior context:
 
-- "В текущей сессии переменная `BITRIX24_WEBHOOK_URL` пустая, но сам webhook у меня уже есть. Могу сам записать его в `.env` и сразу проверить связь."
+- "Подключение к Битрикс24 в этой сессии ещё не сохранено, но я могу сам настроить его и сразу проверить связь."
 
 Better when DNS failed:
 
-- "Проблема не в JSON. Хост webhook не резолвится по DNS, поэтому Bitrix24 сейчас недоступен из этой среды. Следующий шаг: проверить домен webhook или сеть."
+- "Сейчас не удаётся связаться с Битрикс24. Похоже, проблема в самом подключении. Следующий шаг: я могу быстро перепроверить доступ и сказать точную причину."
 
 Better when auth failed:
 
-- "Связь до Bitrix24 есть, но webhook не авторизуется. Скорее всего, секрет неверный или webhook отозван. Следующий шаг: пересоздать webhook и повторить проверку."
+- "Связь с Битрикс24 есть, но доступ не подтверждён. Скорее всего, подключение нужно обновить. Следующий шаг: я могу переподключить доступ и повторить проверку."
 
 Better for non-technical users asking about business tasks:
 

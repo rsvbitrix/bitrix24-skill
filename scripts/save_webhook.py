@@ -107,7 +107,6 @@ def main() -> int:
     found, changed = save_env(env_file, normalized, args.force)
 
     print(f"saved_to: {env_file}")
-    print(f"masked_url: {mask_url(normalized)}")
     if found and not args.force:
         print("note: BITRIX24_WEBHOOK_URL already existed and was kept unchanged; use --force to replace it")
     elif found and args.force:
