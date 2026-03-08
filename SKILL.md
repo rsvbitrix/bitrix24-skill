@@ -136,7 +136,38 @@ Then read the domain reference that matches the task:
 - `references/timeman.md`
 - `references/sites.md`
 
-## Rules
+## User Interaction Rules
+
+The user is a business person, not a developer. Speak in plain, friendly language. Never show technical details (URLs, JSON, API names, error codes, curl, MCP, webhooks, scripts) unless the user explicitly asks.
+
+### Read requests — execute immediately
+
+Any request to view, list, show, or check data is safe. Execute it right away without asking permission. Examples: "покажи мои задачи", "какие сделки открыты", "что у меня в календаре", "список контактов". Do one automatic retry on failure.
+
+### Write requests — confirm briefly, no tech details
+
+For creating, updating, or deleting data, confirm the action in one short sentence. Example: "Создать сделку «Поставка оборудования» на 500 000 ₽?" — and wait for yes/no. Do NOT explain what API method will be called, do NOT suggest the user do it manually, do NOT offer alternatives.
+
+### Errors — fix silently or report one sentence
+
+When a call fails, run `scripts/check_webhook.py --json` and retry. If it still fails, tell the user one sentence: "Не удалось подключиться к Битрикс24, проверьте, пожалуйста, что портал доступен." Never show error codes, stack traces, or troubleshooting steps.
+
+### Never do
+
+- Never suggest the user create webhooks, configure settings, or do any technical steps themselves.
+- Never show JSON, URLs, method names, parameter names, or code snippets in user-facing replies.
+- Never present multiple-choice troubleshooting options.
+- Never say "API", "REST", "webhook", "MCP", "endpoint", "scope", "token" in user-facing replies.
+
+### Always do
+
+- Respond in the same language the user writes in.
+- Present data in clean, readable format (tables, bullet lists, short summaries).
+- Use business terms: "сделка" not "deal entity", "задача" not "task item", "контакт" not "contact record".
+
+## Technical Rules
+
+These rules are for the agent internally, not for user-facing output.
 
 - Start with `user.current` to get the webhook user's ID — many methods need `ownerId` or `RESPONSIBLE_ID`.
 - Do not invent method names. There is no `calendar.get`, `tasks.list`, etc. Always use exact names from the reference files or MCP search. When unsure, search MCP first.
@@ -148,9 +179,6 @@ Then read the domain reference that matches the task:
 - Treat `ACCESS_DENIED`, `insufficient_scope`, `QUERY_LIMIT_EXCEEDED`, and `expired_token` as normal operational cases.
 - For `imbot.*`, persist and reuse the same `CLIENT_ID`.
 - When a call fails, run `scripts/check_webhook.py --json` before asking the user.
-- In user-facing replies, talk about "connection to Bitrix24" in plain language. Do not show webhook URLs, secrets, curl, MCP, DNS, or JSON details unless explicitly asked.
-- For safe read-only requests ("show my schedule", "list my tasks", "show deals"), execute immediately without asking permission. Do one automatic retry on failure.
-- Do not present multiple-choice troubleshooting options. Either do the next safe step yourself or report one concise blocker.
 - When the portal-specific configuration matters, verify exact field names with `bitrix-method-details`.
 
 ## Domain References
