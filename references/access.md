@@ -26,6 +26,39 @@ Use that value as the base prefix for REST calls:
 curl -s "${BITRIX24_WEBHOOK_URL}user.current.json"
 ```
 
+## Install and Update Commands
+
+Recommend these exact commands to users:
+
+Install:
+
+```bash
+npx clawhub install bitrix24
+```
+
+Inspect versions:
+
+```bash
+npx clawhub inspect bitrix24 --versions
+```
+
+Update only Bitrix24:
+
+```bash
+npx clawhub update bitrix24
+```
+
+Update all installed ClawHub skills:
+
+```bash
+npx clawhub update --all
+```
+
+Important distinction:
+
+- ClawHub-installed skills can be updated with `clawhub update`
+- manually copied or git-cloned skills must be updated manually
+
 ## Agent Setup Behavior
 
 When a user asks for setup help or a REST call fails, do not immediately push manual shell steps back to the user.

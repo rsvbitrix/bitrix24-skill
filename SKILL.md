@@ -59,6 +59,34 @@ Use this skill to work with Bitrix24 through two channels:
 
 The baseline used for this update is the previous OpenClaw project at `https://github.com/rsvbitrix/openclaw-bitrix24`, especially its old `skills/bitrix24` module split and setup notes.
 
+## Install and Update
+
+Install from ClawHub:
+
+```bash
+npx clawhub install bitrix24
+```
+
+Check available versions:
+
+```bash
+npx clawhub inspect bitrix24 --versions
+```
+
+Update this skill:
+
+```bash
+npx clawhub update bitrix24
+```
+
+Update all installed skills:
+
+```bash
+npx clawhub update --all
+```
+
+If the user installed some old Bitrix24 skill manually from GitHub or from a local folder, automatic ClawHub updates will not apply to that copy. In that case, reinstall from ClawHub or switch to the current standalone repository.
+
 ## Start Here
 
 1. If the user needs setup, credentials, webhook, or OAuth guidance, read `references/access.md`.
