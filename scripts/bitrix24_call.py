@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Call Bitrix24 REST methods using saved config, env vars, or explicit URL."""
+"""Call Bitrix24 REST methods using saved config or explicit URL."""
 
 from __future__ import annotations
 
@@ -19,14 +19,8 @@ from bitrix24_config import load_url, normalize_url, persist_url_to_config, vali
 def parse_args() -> argparse.Namespace:
     parser = argparse.ArgumentParser(description="Call a Bitrix24 REST method.")
     parser.add_argument("method", help="REST method, e.g. user.current or calendar.event.get")
-    parser.add_argument("--url", help="Webhook URL override")
+    parser.add_argument("--url", help="Webhook URL (saved to config automatically)")
     parser.add_argument("--config-file", help="Config file path override")
-    parser.add_argument(
-        "--env-file",
-        action="append",
-        default=[],
-        help="Additional env files to search for BITRIX24_WEBHOOK_URL",
-    )
     parser.add_argument(
         "--param",
         action="append",
@@ -50,12 +44,13 @@ def parse_params(raw_params: list[str]) -> list[tuple[str, str]]:
 
 def main() -> int:
     args = parse_args()
-    raw_url, source = load_url(cli_url=args.url, config_file=args.config_file, env_files=args.env_file)
+    raw_url, source = load_url(cli_url=args.url, config_file=args.config_file)
     if not raw_url:
         print(json.dumps({"ok": False, "error": "No Bitrix24 webhook configured", "source": source}, ensure_ascii=True, indent=2))
         return 1
 
     normalized_url = validate_url(raw_url)
+
     if not source.startswith("config:"):
         persist_url_to_config(normalized_url, args.config_file)
 

@@ -1,18 +1,16 @@
 # Access and Auth
 
-## Legacy Baseline Used For This Update
-
-- Previous OpenClaw repository: `https://github.com/rsvbitrix/openclaw-bitrix24`
-- Previous skill entrypoint: `skills/bitrix24/SKILL.md`
-- Previous access notes came from the old project README and plugin config
-
-Use those legacy notes as historical context only. Prefer current MCP docs when there is any doubt.
-
-## Fastest Setup: Inbound Webhook
+## Webhook Setup
 
 1. In Bitrix24 open `Developer resources -> Other -> Inbound webhook`.
 2. Create a webhook and copy its URL.
-3. Save it once in the skill config.
+3. Save it:
+
+```bash
+python3 scripts/bitrix24_call.py user.current --url "<webhook>" --json
+```
+
+This saves the webhook to `~/.config/bitrix24-skill/config.json` and verifies it works in one step.
 
 Expected format:
 
@@ -20,135 +18,53 @@ Expected format:
 https://your-portal.bitrix24.ru/rest/<user_id>/<webhook>/
 ```
 
-Preferred setup command:
+After that, the skill reuses the saved webhook automatically for all calls.
+
+To replace an existing webhook:
 
 ```bash
-python3 <path-to-skill>/scripts/save_webhook.py --url "https://your-portal.bitrix24.ru/rest/1/secret/" --check
+python3 scripts/save_webhook.py --url "<new-webhook>" --force --check
 ```
-
-After that, the skill should reuse the saved webhook automatically.
-
-The skill also supports migration from older workspace env layouts. If it finds legacy variables like:
-
-- `B24_DOMAIN`
-- `B24_AUTH_MODE=webhook`
-- `B24_WEBHOOK_USER_ID`
-- `B24_WEBHOOK_CODE`
-
-it can reconstruct the webhook automatically and persist it into the new stable config.
-
-## Install and Update Commands
-
-Recommend these exact commands to users:
-
-Install:
-
-```bash
-npx clawhub install bitrix24
-```
-
-Inspect versions:
-
-```bash
-npx clawhub inspect bitrix24 --versions
-```
-
-Update only Bitrix24:
-
-```bash
-npx clawhub update bitrix24
-```
-
-Update all installed ClawHub skills:
-
-```bash
-npx clawhub update --all
-```
-
-Important distinction:
-
-- ClawHub-installed skills can be updated with `clawhub update`
-- manually copied or git-cloned skills must be updated manually
 
 ## Agent Setup Behavior
 
-When a user asks for setup help or a REST call fails, do not immediately push manual shell steps back to the user.
+When a user asks for setup help or a REST call fails:
 
-Instead:
-
-1. inspect the saved webhook config first
-2. use env vars or nearby `.env` files only as fallback
-3. if legacy `B24_*` webhook fields exist, reconstruct the webhook and migrate it into saved config
-4. normalize the webhook URL to ensure it ends with `/`
-5. probe `user.current.json`
-6. only then ask the user for missing information or blocked access
+1. Check saved config with `scripts/check_webhook.py --json`
+2. If the user already shared a webhook in the conversation, save it and retry
+3. Only ask the user for a webhook if no saved config exists
 
 Mask the webhook secret in user-facing output.
-
-If the user already shared a webhook and wants you to configure it, prefer doing it yourself:
-
-```bash
-python3 <path-to-skill>/scripts/save_webhook.py --url "https://portal.bitrix24.ru/rest/1/secret/" --check
-```
-
-Important limitation:
-
-- a child process cannot mutate an already running parent shell session
-- but the skill can persist the webhook in its own config file
-- and then use that saved config for future checks and calls
 
 ## Permissions
 
 Grant the permission groups that match the methods you will call.
 
-Recommended full-coverage set for this skill:
+Recommended full-coverage set:
 
 - CRM
 - Tasks
 - Calendar
 - Disk or Drive
 - IM or Chat
-- user and department related access
-
-If you are also using the historical OpenClaw messenger plugin flow from `openclaw-bitrix24`, keep `imbot`, `im`, and `disk` enabled as well. That recommendation comes from the previous plugin README and plugin manifest, not from the MCP server itself.
+- User and department access
 
 ## `CLIENT_ID` For Bot Integrations
 
 For `imbot` integrations, Bitrix24 bot registration requires `CLIENT_ID`.
 
-Operational rule:
-
-- provide `CLIENT_ID` when registering the bot
-- persist it as part of the bot credentials
-- pass the same `CLIENT_ID` into all later `imbot.*` calls
-
-Treat `CLIENT_ID` as a secret. It is part of the control boundary that prevents unrelated callers from operating someone else's bot.
-
-Historical implementation note from the earlier Claw integration:
-
-- `CLIENT_ID` was derived deterministically from `md5(webhook)`
-
-That is acceptable as an integration strategy when all of the following are true:
-
-- the resulting value is stable for the same bot
-- the underlying webhook secret is not exposed
-- the integration stores and reuses the same derived value consistently
+- Provide `CLIENT_ID` when registering the bot
+- Persist it as part of the bot credentials
+- Pass the same `CLIENT_ID` into all later `imbot.*` calls
+- Treat `CLIENT_ID` as a secret
 
 ## Official MCP Docs Endpoint
-
-Bitrix24 documentation is exposed through:
 
 ```text
 https://mcp-dev.bitrix24.tech/mcp
 ```
 
-Observed endpoint behavior on March 8, 2026:
-
-- `GET` without `Accept: text/event-stream` returned `406 Not Acceptable`
-- `initialize` succeeded with protocol version `2025-03-26`
-- server info reported `b24-dev-mcp` version `0.2.0`
-
-Current tools exposed by the server:
+Tools exposed by the server:
 
 - `bitrix-search`
 - `bitrix-app-development-doc-details`
@@ -170,23 +86,21 @@ Use OAuth when:
 - users connect their own portals to your service
 - you need renewable tokens instead of a fixed webhook secret
 
-The official Bitrix24 app-development doc says the full OAuth flow is for external services and does not apply to local webhooks.
-
 Key official docs:
 
 - Full OAuth: `https://apidocs.bitrix24.ru/settings/oauth/index.html`
 - REST call overview: `https://apidocs.bitrix24.ru/sdk/bx24-js-sdk/how-to-call-rest-methods/index.html`
 - Install callback: `https://apidocs.bitrix24.ru/settings/app-installation/mass-market-apps/installation-callback.html`
 
-## OAuth Facts Confirmed From MCP Docs
+## OAuth Facts From MCP Docs
 
-- The authorization server is `https://oauth.bitrix24.tech/`
-- Authorization starts by sending the user to `https://portal.bitrix24.com/oauth/authorize/`
-- The temporary authorization `code` is valid for 30 seconds
-- Token exchange happens at `https://oauth.bitrix24.tech/oauth/token/`
-- Successful token exchange returns `access_token`, `refresh_token`, `client_endpoint`, `server_endpoint`, and `scope`
+- Authorization server: `https://oauth.bitrix24.tech/`
+- Authorization starts at `https://portal.bitrix24.com/oauth/authorize/`
+- Temporary authorization `code` is valid for 30 seconds
+- Token exchange at `https://oauth.bitrix24.tech/oauth/token/`
+- Returns `access_token`, `refresh_token`, `client_endpoint`, `server_endpoint`, `scope`
 
-Useful exact MCP titles for app/auth topics:
+Useful MCP titles for auth topics:
 
 - `Полный протокол авторизации OAuth 2.0`
 - `Упрощенный вариант получения токенов OAuth 2.0`
@@ -195,53 +109,8 @@ Useful exact MCP titles for app/auth topics:
 
 ## Install Callback For UI-Less Apps
 
-If you build a local or UI-less app, Bitrix24 can POST OAuth credentials to an install callback URL immediately after installation. That flow is documented in `Callback установки`.
+If you build a local or UI-less app, Bitrix24 can POST OAuth credentials to an install callback URL. That flow is documented in `Callback установки`.
 
-For that scenario:
-
-- save the received `access_token` and `refresh_token`
-- refresh access tokens on your backend
-- do not rely on browser-side JS install helpers for the callback flow
-
-## Quick Probe
-
-For fast diagnosis, prefer the bundled script:
-
-```bash
-python3 <path-to-skill>/scripts/check_webhook.py
-```
-
-Useful variants:
-
-```bash
-python3 <path-to-skill>/scripts/check_webhook.py --json
-python3 <path-to-skill>/scripts/check_webhook.py --config-file ~/.config/bitrix24-skill/config.json --json
-python3 <path-to-skill>/scripts/check_webhook.py --url "https://portal.bitrix24.ru/rest/1/secret/"
-```
-
-## Save Webhook
-
-For convenient setup, use:
-
-```bash
-python3 <path-to-skill>/scripts/save_webhook.py --url "https://portal.bitrix24.ru/rest/1/secret/" --check
-```
-
-Useful variants:
-
-```bash
-python3 <path-to-skill>/scripts/save_webhook.py --url "https://portal.bitrix24.ru/rest/1/secret/"
-python3 <path-to-skill>/scripts/save_webhook.py --url "https://portal.bitrix24.ru/rest/1/secret/" --config-file ~/.config/bitrix24-skill/config.json
-python3 <path-to-skill>/scripts/save_webhook.py --url "https://portal.bitrix24.ru/rest/1/secret/" --env-file .env.local
-python3 <path-to-skill>/scripts/save_webhook.py --url "https://portal.bitrix24.ru/rest/1/secret/" --force --check
-```
-
-## Preferred Runtime Path
-
-For actual REST calls, prefer:
-
-```bash
-python3 <path-to-skill>/scripts/bitrix24_call.py user.current --json
-```
-
-This is more stable than relying on the current shell environment.
+- Save the received `access_token` and `refresh_token`
+- Refresh access tokens on your backend
+- Do not rely on browser-side JS install helpers for the callback flow

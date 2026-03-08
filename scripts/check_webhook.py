@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Check Bitrix24 webhook availability from saved config, env vars, or env files."""
+"""Check Bitrix24 webhook availability from saved config or explicit URL."""
 
 from __future__ import annotations
 
@@ -22,12 +22,6 @@ def parse_args() -> argparse.Namespace:
     parser = argparse.ArgumentParser(description="Check a Bitrix24 webhook URL.")
     parser.add_argument("--url", help="Webhook URL to check")
     parser.add_argument("--config-file", help="Config file path override")
-    parser.add_argument(
-        "--env-file",
-        action="append",
-        default=[],
-        help="Read BITRIX24_WEBHOOK_URL from this env file (repeatable)",
-    )
     parser.add_argument("--skip-http", action="store_true", help="Skip user.current probe")
     parser.add_argument("--json", action="store_true", help="Print JSON output")
     parser.add_argument("--timeout", type=float, default=10.0, help="HTTP timeout in seconds")
@@ -77,7 +71,7 @@ def safe_json(payload: str) -> dict[str, Any] | None:
 
 
 def build_result(args: argparse.Namespace) -> dict[str, Any]:
-    raw_url, source = load_url(cli_url=args.url, config_file=args.config_file, env_files=args.env_file)
+    raw_url, source = load_url(cli_url=args.url, config_file=args.config_file)
     result: dict[str, Any] = {
         "source": source,
         "url_found": raw_url is not None,
@@ -87,7 +81,7 @@ def build_result(args: argparse.Namespace) -> dict[str, Any]:
     }
 
     if not raw_url:
-        result["error"] = "No Bitrix24 webhook found in config, environment, or nearby env files"
+        result["error"] = "No Bitrix24 webhook found in config"
         return result
 
     normalized = normalize_url(raw_url)

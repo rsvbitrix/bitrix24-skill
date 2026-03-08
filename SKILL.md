@@ -49,127 +49,87 @@ metadata:
 
 # Bitrix24
 
-Use this skill to work with Bitrix24 through two channels:
+Work with Bitrix24 through two channels:
 
-- direct REST calls through a saved Bitrix24 webhook config, with `BITRIX24_WEBHOOK_URL` only as fallback
-- official live documentation lookup through the Bitrix24 MCP server at `https://mcp-dev.bitrix24.tech/mcp`
+- **REST calls** through a saved webhook in `~/.config/bitrix24-skill/config.json`
+- **Live documentation** through the Bitrix24 MCP server at `https://mcp-dev.bitrix24.tech/mcp`
 
-The baseline used for this update is the previous OpenClaw project at `https://github.com/rsvbitrix/openclaw-bitrix24`, especially its old `skills/bitrix24` module split and setup notes.
+## Setup
 
-## Install and Update
-
-Install from ClawHub:
+The only thing needed is a webhook URL. When the user provides one, save it and verify:
 
 ```bash
-npx clawhub install bitrix24
+python3 scripts/bitrix24_call.py user.current --url "<webhook>" --json
 ```
 
-Check available versions:
+This saves the webhook to config and calls `user.current` to verify it works. After that, all calls use the saved config automatically.
+
+If the webhook is not configured yet and you need to set it up, read `references/access.md`.
+
+## Making REST Calls
 
 ```bash
-npx clawhub inspect bitrix24 --versions
+python3 scripts/bitrix24_call.py <method> --json
 ```
 
-Update this skill:
+Examples:
 
 ```bash
-npx clawhub update bitrix24
-```
-
-Update all installed skills:
-
-```bash
-npx clawhub update --all
-```
-
-If the user installed some old Bitrix24 skill manually from GitHub or from a local folder, automatic ClawHub updates will not apply to that copy. In that case, reinstall from ClawHub or switch to the current standalone repository.
-
-## Start Here
-
-1. If the user needs setup, credentials, webhook, or OAuth guidance, read `references/access.md`.
-2. If the user provides a webhook, save it immediately with `scripts/save_webhook.py`.
-3. For actual REST requests, prefer `scripts/bitrix24_call.py` so the skill keeps working even when shell env vars are missing.
-4. If webhook calls fail, setup is unclear, or connectivity looks wrong, read `references/troubleshooting.md` and run `scripts/check_webhook.py` before asking the user to debug manually.
-5. If the exact Bitrix24 method, event, or article is unknown, read `references/mcp-workflow.md` and search before calling anything.
-6. Then read the domain file that matches the task:
-   - `references/crm.md`
-   - `references/tasks.md`
-   - `references/chat.md`
-   - `references/calendar.md`
-   - `references/drive.md`
-   - `references/users.md`
-
-## Preferred Call Pattern
-
-Prefer the bundled caller script because it reads the saved webhook config automatically:
-
-```bash
-python3 <path-to-skill>/scripts/bitrix24_call.py user.current --json
-```
-
-Example:
-
-```bash
-python3 <path-to-skill>/scripts/bitrix24_call.py crm.deal.list \
+python3 scripts/bitrix24_call.py user.current --json
+python3 scripts/bitrix24_call.py crm.deal.list \
   --param 'select[]=ID' \
   --param 'select[]=TITLE' \
   --param 'select[]=STAGE_ID' \
   --json
 ```
 
-Saved webhook format:
+If calls fail, read `references/troubleshooting.md` and run `scripts/check_webhook.py --json`.
 
-```text
-https://your-portal.bitrix24.ru/rest/<user_id>/<webhook>/
-```
+## Finding the Right Method
 
-Fallback sources still supported:
+When the exact method name is unknown, use MCP docs in this order:
 
-- `BITRIX24_WEBHOOK_URL`
-- nearby `.env` files
-
-If the task is documentation-only and you only need live lookup through MCP, the MCP server still works even before a webhook is configured.
-
-## MCP Workflow
-
-Use the official MCP docs server in this order:
-
-1. `bitrix-search` to find the exact method, event, or article title.
+1. `bitrix-search` to find the method, event, or article title.
 2. `bitrix-method-details` for REST methods.
 3. `bitrix-event-details` for event docs.
 4. `bitrix-article-details` for regular documentation articles.
-5. `bitrix-app-development-doc-details` for OAuth, install callbacks, BX24 SDK, and app-development topics.
+5. `bitrix-app-development-doc-details` for OAuth, install callbacks, BX24 SDK topics.
 
-Important: do not guess method names from memory when the task is sensitive or the method family is large. Search first, then request exact details.
+Do not guess method names from memory when the task is sensitive or the method family is large. Search first.
 
-## Shared Rules
+Then read the domain reference that matches the task:
+
+- `references/crm.md`
+- `references/tasks.md`
+- `references/chat.md`
+- `references/calendar.md`
+- `references/drive.md`
+- `references/users.md`
+
+## Rules
 
 - Prefer server-side filtering with `filter[...]` and narrow output with `select[]`.
 - Use `*.fields` or user-field discovery methods before writing custom fields.
 - Expect pagination on list methods via `start` or method-specific `START`.
 - Use ISO 8601 date-time strings when a method expects a date-time value.
 - Treat `ACCESS_DENIED`, `insufficient_scope`, `QUERY_LIMIT_EXCEEDED`, and `expired_token` as normal operational cases.
-- For `imbot.*`, persist and reuse the same `CLIENT_ID`; do not treat it as a public bot identifier.
-- When a webhook call fails, do first-line diagnosis yourself: inspect saved webhook config first, then env fallbacks, then probe `user.current.json`.
-- In setup and troubleshooting replies, prefer 2-4 short sentences and one recommended next action, not a long checklist with multiple branches.
-- If the user provides a webhook and asks to configure Bitrix24, save it immediately with `scripts/save_webhook.py --check`.
-- By default, do not show end users `curl`, `MCP`, `.env`, DNS, JSON escaping, or other implementation details. Talk about connection to Bitrix24 in plain language. Only reveal technical steps if the user explicitly asks for technical details.
-- Do not show webhook URLs, webhook secrets, or even masked secrets in normal user-facing replies. Mention them only if the user explicitly asks for technical debugging details.
-- For safe read-only requests like "show my schedule", "list my tasks", "show deals", or "check connection", execute the request immediately. Do not ask the user whether you should retry, test, or proceed unless the action is risky or blocked.
-- Do not present multiple-choice troubleshooting options to end users. Either do the next safe step yourself or report one concise blocker.
-- When the portal-specific configuration matters, verify the exact field names and examples with `bitrix-method-details`.
-- For large or cross-entity operations, prefer batch or dedicated import methods only after checking current docs in MCP.
+- For `imbot.*`, persist and reuse the same `CLIENT_ID`.
+- When a call fails, run `scripts/check_webhook.py --json` before asking the user.
+- In user-facing replies, talk about "connection to Bitrix24" in plain language. Do not show webhook URLs, secrets, curl, MCP, DNS, or JSON details unless explicitly asked.
+- For safe read-only requests ("show my schedule", "list my tasks", "show deals"), execute immediately without asking permission. Do one automatic retry on failure.
+- Do not present multiple-choice troubleshooting options. Either do the next safe step yourself or report one concise blocker.
+- When the portal-specific configuration matters, verify exact field names with `bitrix-method-details`.
 
 ## Domain References
 
-- `references/access.md` for webhook, OAuth, install callback, and legacy source notes.
-- `references/troubleshooting.md` for webhook setup, DNS failures, env loading, and self-diagnostics.
-- `references/mcp-workflow.md` for live docs discovery and tool selection.
-- `references/crm.md` for deals, contacts, leads, companies, activities, and modern `crm.item.*` notes.
-- `references/tasks.md` for tasks, checklists, comments, planner, and deprecated task APIs.
-- `references/chat.md` for `im.*`, `imbot.*`, notifications, dialog history, and file-to-chat flows.
-- `references/calendar.md` for sections, events, attendees, recurrence, and availability checks.
-- `references/drive.md` for storage, folder, file, and external-link workflows.
-- `references/users.md` for users, departments, org-structure lookups, and messenger-side search methods.
+- `references/access.md` — webhook setup, OAuth, install callbacks.
+- `references/troubleshooting.md` — diagnostics and self-repair.
+- `references/mcp-workflow.md` — MCP tool selection and query patterns.
+- `references/crm.md` — deals, contacts, leads, companies, activities.
+- `references/tasks.md` — tasks, checklists, comments, planner.
+- `references/chat.md` — im, imbot, notifications, dialog history.
+- `references/calendar.md` — sections, events, attendees, availability.
+- `references/drive.md` — storage, folders, files, external links.
+- `references/users.md` — users, departments, org-structure.
 
 Read only the reference file that matches the current task.
