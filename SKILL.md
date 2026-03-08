@@ -108,10 +108,13 @@ Then read the domain reference that matches the task:
 
 ## Rules
 
+- Start with `user.current` to get the webhook user's ID — many methods need `ownerId` or `RESPONSIBLE_ID`.
+- Do not invent method names. There is no `calendar.get`, `tasks.list`, etc. Always use exact names from the reference files or MCP search. When unsure, search MCP first.
 - Prefer server-side filtering with `filter[...]` and narrow output with `select[]`.
+- Filter operators are prefixes on the key: `>=DEADLINE`, `!STATUS`, `>OPPORTUNITY`. Not on the value.
 - Use `*.fields` or user-field discovery methods before writing custom fields.
-- Expect pagination on list methods via `start` or method-specific `START`.
-- Use ISO 8601 date-time strings when a method expects a date-time value.
+- Expect pagination on list methods via `start` (page size = 50).
+- Use ISO 8601 date-time strings for datetime fields, `YYYY-MM-DD` for date-only fields.
 - Treat `ACCESS_DENIED`, `insufficient_scope`, `QUERY_LIMIT_EXCEEDED`, and `expired_token` as normal operational cases.
 - For `imbot.*`, persist and reuse the same `CLIENT_ID`.
 - When a call fails, run `scripts/check_webhook.py --json` before asking the user.
