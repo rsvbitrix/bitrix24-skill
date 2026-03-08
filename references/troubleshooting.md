@@ -106,12 +106,14 @@ Prefer:
 - what failed
 - what is already confirmed working
 - one next action
+- plain business language like "connection to Bitrix24" or "access to calendar"
 
 Avoid:
 
 - long generic lists of shell commands for the user
 - asking for confirmation before a simple retry you can do yourself
 - exposing the full webhook secret
+- talking about `curl`, `MCP`, JSON quoting, `.env`, DNS, or webhook mechanics unless the user explicitly wants technical details
 
 ## Response Templates
 
@@ -136,3 +138,9 @@ Better when DNS failed:
 Better when auth failed:
 
 - "Связь до Bitrix24 есть, но webhook не авторизуется. Скорее всего, секрет неверный или webhook отозван. Следующий шаг: пересоздать webhook и повторить проверку."
+
+Better for non-technical users asking about business tasks:
+
+- "Сейчас не могу получить данные из Битрикс24. Могу сам переподключить доступ и сразу повторить."
+- "Сейчас календарь Битрикс24 недоступен. Могу быстро проверить подключение и затем показать расписание."
+- "Не удалось связаться с Битрикс24. Могу сам проверить подключение и вернуться с результатом."
