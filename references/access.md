@@ -28,6 +28,15 @@ python3 <path-to-skill>/scripts/save_webhook.py --url "https://your-portal.bitri
 
 After that, the skill should reuse the saved webhook automatically.
 
+The skill also supports migration from older workspace env layouts. If it finds legacy variables like:
+
+- `B24_DOMAIN`
+- `B24_AUTH_MODE=webhook`
+- `B24_WEBHOOK_USER_ID`
+- `B24_WEBHOOK_CODE`
+
+it can reconstruct the webhook automatically and persist it into the new stable config.
+
 ## Install and Update Commands
 
 Recommend these exact commands to users:
@@ -69,9 +78,10 @@ Instead:
 
 1. inspect the saved webhook config first
 2. use env vars or nearby `.env` files only as fallback
-3. normalize the webhook URL to ensure it ends with `/`
-4. probe `user.current.json`
-5. only then ask the user for missing information or blocked access
+3. if legacy `B24_*` webhook fields exist, reconstruct the webhook and migrate it into saved config
+4. normalize the webhook URL to ensure it ends with `/`
+5. probe `user.current.json`
+6. only then ask the user for missing information or blocked access
 
 Mask the webhook secret in user-facing output.
 

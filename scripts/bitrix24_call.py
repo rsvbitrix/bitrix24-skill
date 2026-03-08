@@ -13,7 +13,7 @@ SCRIPT_DIR = Path(__file__).resolve().parent
 if str(SCRIPT_DIR) not in sys.path:
     sys.path.insert(0, str(SCRIPT_DIR))
 
-from bitrix24_config import load_url, normalize_url  # noqa: E402
+from bitrix24_config import load_url, normalize_url, persist_url_to_config, validate_url  # noqa: E402
 
 
 def parse_args() -> argparse.Namespace:
@@ -55,6 +55,10 @@ def main() -> int:
         print(json.dumps({"ok": False, "error": "No Bitrix24 webhook configured", "source": source}, ensure_ascii=True, indent=2))
         return 1
 
+    normalized_url = validate_url(raw_url)
+    if not source.startswith("config:"):
+        persist_url_to_config(normalized_url, args.config_file)
+
     try:
         params = parse_params(args.param)
     except ValueError as exc:
@@ -62,7 +66,7 @@ def main() -> int:
         return 1
 
     method = args.method[:-5] if args.method.endswith(".json") else args.method
-    url = normalize_url(raw_url) + f"{method}.json"
+    url = normalize_url(normalized_url) + f"{method}.json"
     data = parse.urlencode(params).encode("utf-8")
     req = request.Request(url, data=data, headers={"Accept": "application/json"})
 

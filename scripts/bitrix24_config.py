@@ -51,6 +51,24 @@ def read_env_file(path: Path) -> str | None:
     return None
 
 
+def read_env_map(path: Path) -> dict[str, str]:
+    values: dict[str, str] = {}
+    if not path.is_file():
+        return values
+
+    for raw_line in path.read_text(encoding="utf-8").splitlines():
+        line = raw_line.strip()
+        if not line or line.startswith("#"):
+            continue
+        if line.startswith("export "):
+            line = line[7:].strip()
+        if "=" not in line:
+            continue
+        key, value = line.split("=", 1)
+        values[key.strip()] = value.strip().strip('"').strip("'")
+    return values
+
+
 def candidate_env_files(extra: list[str]) -> list[Path]:
     paths: list[Path] = []
     for item in extra:
@@ -82,6 +100,24 @@ def save_config(path: Path, data: dict) -> None:
     path.write_text(json.dumps(data, ensure_ascii=True, indent=2) + "\n", encoding="utf-8")
 
 
+def build_legacy_webhook(values: dict[str, str]) -> str | None:
+    mode = values.get("B24_AUTH_MODE", "").strip().lower()
+    domain = values.get("B24_DOMAIN", "").strip()
+    user_id = values.get("B24_WEBHOOK_USER_ID", "").strip()
+    code = values.get("B24_WEBHOOK_CODE", "").strip()
+    if mode != "webhook" or not domain or not user_id or not code:
+        return None
+    return f"https://{domain}/rest/{user_id}/{code}/"
+
+
+def persist_url_to_config(url: str, config_file: str | None = None) -> Path:
+    config_path = Path(config_file).expanduser() if config_file else DEFAULT_CONFIG_PATH
+    config = load_config(config_path)
+    config["webhook_url"] = validate_url(url)
+    save_config(config_path, config)
+    return config_path
+
+
 def load_url(
     *,
     cli_url: str | None,
@@ -95,6 +131,10 @@ def load_url(
     if env_value:
         return env_value, "env:BITRIX24_WEBHOOK_URL"
 
+    legacy_env_value = build_legacy_webhook(dict(os.environ))
+    if legacy_env_value:
+        return legacy_env_value, "env:legacy-b24"
+
     config_path = Path(config_file).expanduser() if config_file else DEFAULT_CONFIG_PATH
     config = load_config(config_path)
     config_url = config.get("webhook_url")
@@ -105,5 +145,8 @@ def load_url(
         value = read_env_file(path)
         if value:
             return value, f"env-file:{path}"
+        legacy_value = build_legacy_webhook(read_env_map(path))
+        if legacy_value:
+            return legacy_value, f"env-file-legacy:{path}"
 
     return None, "missing"

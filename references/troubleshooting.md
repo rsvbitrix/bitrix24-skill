@@ -11,10 +11,11 @@ Preferred order:
 1. inspect saved webhook config
 2. inspect current `BITRIX24_WEBHOOK_URL` only as fallback
 3. inspect nearby `.env` files if needed
-4. validate webhook format
-5. resolve DNS for the host
-6. probe `user.current.json`
-7. report concrete findings and the next fix
+4. inspect legacy `B24_*` webhook variables if present
+5. validate webhook format
+6. resolve DNS for the host
+7. probe `user.current.json`
+8. report concrete findings and the next fix
 
 Prefer the bundled script:
 
@@ -48,6 +49,7 @@ If `BITRIX24_WEBHOOK_URL` is missing:
 - check saved webhook config first
 - check `.env`
 - check `.env.local`
+- check legacy `B24_DOMAIN`, `B24_AUTH_MODE`, `B24_WEBHOOK_USER_ID`, `B24_WEBHOOK_CODE`
 - check the current workspace root
 - only ask the user for the webhook if no local source exists
 
