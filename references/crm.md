@@ -85,6 +85,25 @@ python3 scripts/bitrix24_call.py crm.activity.add \
   --json
 ```
 
+### Stuck deals (no activity for 14+ days)
+
+Deals in active pipeline with no recent modification — useful for proactive "💤" warnings:
+
+```bash
+python3 scripts/bitrix24_call.py crm.deal.list \
+  --param 'filter[ASSIGNED_BY_ID]=1' \
+  --param 'filter[STAGE_SEMANTIC_ID]=P' \
+  --param 'filter[<DATE_MODIFY]=2026-02-22' \
+  --param 'select[]=ID' \
+  --param 'select[]=TITLE' \
+  --param 'select[]=STAGE_ID' \
+  --param 'select[]=DATE_MODIFY' \
+  --param 'select[]=OPPORTUNITY' \
+  --json
+```
+
+`STAGE_SEMANTIC_ID=P` = in progress (active pipeline). `<DATE_MODIFY` = last modified before 14 days ago.
+
 ## Working Rules
 
 - Read `*.fields` before writing custom or portal-specific fields.

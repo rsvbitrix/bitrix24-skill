@@ -59,6 +59,27 @@ To exclude deferred tasks: `filter[!STATUS]=6`
 
 ## Common Use Cases
 
+### Overdue tasks (for proactive warnings)
+
+Tasks where deadline has passed but task is not completed or deferred:
+
+```bash
+python3 scripts/bitrix24_call.py tasks.task.list \
+  --param 'filter[RESPONSIBLE_ID]=1' \
+  --param 'filter[<DEADLINE]=2026-03-08' \
+  --param 'filter[<REAL_STATUS]=5' \
+  --param 'select[]=ID' \
+  --param 'select[]=TITLE' \
+  --param 'select[]=DEADLINE' \
+  --param 'select[]=STATUS' \
+  --param 'order[DEADLINE]=asc' \
+  --json
+```
+
+`<DEADLINE` = deadline before today. `<REAL_STATUS` = status less than 5 (excludes completed=5 and deferred=6).
+
+Use this in morning briefing and task lists to flag overdue items with "⚠️".
+
 ### Show active tasks for current user
 
 First get user ID, then list active tasks:

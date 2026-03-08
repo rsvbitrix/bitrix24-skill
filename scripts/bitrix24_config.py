@@ -72,3 +72,23 @@ def load_url(
         return config_url, f"config:{config_path}"
 
     return None, "missing"
+
+
+def get_cached_user(config_file: str | None = None) -> dict | None:
+    """Return cached user data (user_id, timezone) or None."""
+    config_path = Path(config_file).expanduser() if config_file else DEFAULT_CONFIG_PATH
+    config = load_config(config_path)
+    user_id = config.get("user_id")
+    if user_id is not None:
+        return {"user_id": user_id, "timezone": config.get("timezone", "")}
+    return None
+
+
+def cache_user_data(user_id: int, timezone: str = "", config_file: str | None = None) -> None:
+    """Save user_id and timezone to config for reuse."""
+    config_path = Path(config_file).expanduser() if config_file else DEFAULT_CONFIG_PATH
+    config = load_config(config_path)
+    config["user_id"] = user_id
+    if timezone:
+        config["timezone"] = timezone
+    save_config(config_path, config)

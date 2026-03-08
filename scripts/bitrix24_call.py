@@ -13,7 +13,7 @@ SCRIPT_DIR = Path(__file__).resolve().parent
 if str(SCRIPT_DIR) not in sys.path:
     sys.path.insert(0, str(SCRIPT_DIR))
 
-from bitrix24_config import load_url, normalize_url, persist_url_to_config, validate_url  # noqa: E402
+from bitrix24_config import load_url, normalize_url, persist_url_to_config, validate_url, cache_user_data  # noqa: E402
 
 
 def parse_args() -> argparse.Namespace:
@@ -82,6 +82,18 @@ def main() -> int:
         body = {"raw": payload}
 
     result = {"ok": status < 400, "status": status, "source": source, "body": body}
+
+    # Auto-cache user_id and timezone after successful user.current call
+    if method == "user.current" and status < 400 and isinstance(body, dict):
+        user_result = body.get("result", {})
+        uid = user_result.get("ID")
+        tz = user_result.get("TIME_ZONE", "")
+        if uid:
+            try:
+                cache_user_data(int(uid), tz, args.config_file)
+            except Exception:
+                pass
+
     if args.json:
         print(json.dumps(result, ensure_ascii=True, indent=2))
     else:

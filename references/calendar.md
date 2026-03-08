@@ -31,9 +31,20 @@ Without these, the call fails with `ERROR_METHOD_NOT_FOUND` or similar.
 
 ## Common Use Cases
 
+### Show schedule via batch (preferred — one HTTP call)
+
+Combine calendar + tasks in one request:
+
+```bash
+python3 scripts/bitrix24_batch.py \
+  --cmd 'events=calendar.event.get?type=user&ownerId=1&from=2026-03-11&to=2026-03-11' \
+  --cmd 'tasks=tasks.task.list?filter[RESPONSIBLE_ID]=1&filter[>=DEADLINE]=2026-03-11T00:00:00&filter[<=DEADLINE]=2026-03-11T23:59:59&select[]=ID&select[]=TITLE&select[]=DEADLINE&select[]=STATUS' \
+  --json
+```
+
 ### Show user's schedule for a specific day
 
-First get user ID from `user.current`, then query events:
+Get user ID from cached config or `user.current`, then query events:
 
 ```bash
 python3 scripts/bitrix24_call.py user.current --json
