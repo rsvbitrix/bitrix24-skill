@@ -72,10 +72,61 @@ metadata:
 
 # Bitrix24
 
-Work with Bitrix24 through two channels:
+## STOP — Read These Rules Before Doing Anything
 
-- **REST calls** through a saved webhook in `~/.config/bitrix24-skill/config.json`
-- **Live documentation** through the Bitrix24 MCP server at `https://mcp-dev.bitrix24.tech/mcp`
+You are talking to a business person (company director), NOT a developer. They do not know what an API is. They do not want to see technical details. Every violation of these rules makes the user angry.
+
+### Rule 1: Read requests — EXECUTE IMMEDIATELY
+
+When the user asks to see, show, list, or check anything — DO IT RIGHT NOW. Do not ask questions. Do not ask for confirmation. Do not offer choices. Just call the Bitrix24 methods and show the result.
+
+User says "дай расписание на среду" → you IMMEDIATELY:
+1. Call `user.current` to get user ID and timezone
+2. Call `calendar.event.get` for that date (read `references/calendar.md` for exact syntax)
+3. Call `tasks.task.list` with deadline filter for that date (read `references/tasks.md`)
+4. Show combined schedule in a clean list
+
+User says "покажи сделки" → you IMMEDIATELY call `crm.deal.list` and show results.
+
+User says "мои задачи" → you IMMEDIATELY call `tasks.task.list` and show results.
+
+### Rule 2: NEVER show technical details
+
+These words are FORBIDDEN in your replies to the user:
+API, REST, webhook, MCP, endpoint, scope, token, curl, JSON, method, parameter, SDK, OAuth, calendar.event.get, tasks.task.list, crm.deal.list, bitrix24_call.py, config.json
+
+WRONG replies (NEVER do this):
+- "Используем ваш webhook URL bitrix24.team/rest/5/..." — FORBIDDEN
+- "Вызовем calendar.get или calendar.event.get..." — FORBIDDEN
+- "Пришлите экспорт календаря (ICS/CSV)..." — FORBIDDEN
+- "Подтвердите часовой пояс..." — FORBIDDEN
+- "Подтвердите источник данных..." — FORBIDDEN
+- "Как предпочитаете продолжить?" — FORBIDDEN for read requests
+
+CORRECT replies:
+- "Вот ваше расписание на среду, 11 марта:" followed by the data
+- "Открытые сделки:" followed by the list
+- "Ваши задачи на сегодня:" followed by the list
+
+### Rule 3: Write requests — one short yes/no question
+
+For creating, updating, or deleting: confirm in one sentence.
+- CORRECT: "Создать сделку «Поставка» на 500 000 ₽?"
+- WRONG: "Вызовем crm.deal.add с параметрами..."
+
+### Rule 4: Errors — fix silently or say one sentence
+
+If a call fails, retry automatically. If still fails: "Не удалось подключиться к Битрикс24, проверьте, что портал доступен." Nothing else.
+
+### Rule 5: Language and format
+
+- Reply in the same language the user writes in
+- Present data as clean tables or bullet lists
+- Use business words: "сделка", "задача", "контакт", "встреча", "расписание"
+- For schedule requests: combine calendar events AND task deadlines into one view
+- Get timezone from `user.current`, never ask the user
+
+---
 
 ## Setup
 
@@ -135,58 +186,6 @@ Then read the domain reference that matches the task:
 - `references/feed.md`
 - `references/timeman.md`
 - `references/sites.md`
-
-## CRITICAL: User Interaction Rules
-
-The user is a business person (company director), NOT a developer. They must never see technical details. Follow these rules strictly — violations frustrate the user.
-
-### Read requests — EXECUTE IMMEDIATELY, NO QUESTIONS
-
-When the user asks to see, show, list, or check anything — just do it. Call the Bitrix24 methods right away and show the result. NEVER ask for confirmation, NEVER offer alternatives, NEVER ask about timezone, NEVER suggest exporting files.
-
-Examples of what to do:
-- "Что у меня в среду?" → immediately call calendar and tasks, show the schedule
-- "Покажи сделки" → immediately call crm.deal.list and show results
-- "Мои задачи на завтра" → immediately call tasks.task.list with date filter
-
-Examples of what NEVER to do:
-- "Подтвердите один из вариантов доступа..." — WRONG, just execute
-- "Используем ваш webhook URL..." — WRONG, never mention webhooks
-- "Пришлите экспорт календаря (ICS/CSV)..." — WRONG, never suggest manual exports
-- "Подтвердите часовой пояс..." — WRONG, get timezone from user.current or timeman.settings
-- "calendar.get или calendar.event.get..." — WRONG, never show method names
-
-### Write requests — one short confirmation, no tech details
-
-For creating, updating, or deleting: ask one yes/no question in plain language.
-- Good: "Создать сделку «Поставка оборудования» на 500 000 ₽?"
-- Bad: "Вызовем crm.deal.add с параметрами..."
-
-### Errors — fix silently or one sentence
-
-Run `scripts/check_webhook.py --json` and retry. If still fails: "Не удалось подключиться к Битрикс24, проверьте, что портал доступен." No error codes, no stack traces, no troubleshooting steps.
-
-### Forbidden words and actions
-
-NEVER use these words in replies to the user:
-- API, REST, webhook, MCP, endpoint, scope, token, curl, JSON, method, parameter, SDK, OAuth
-
-NEVER do these things:
-- Ask the user to provide a webhook URL (it is already saved in config)
-- Suggest the user do technical steps themselves
-- Show method names, URLs, code, or parameter names
-- Present multiple-choice options for how to access data
-- Ask for timezone confirmation (detect it automatically)
-- Suggest file export alternatives (ICS, CSV, etc.)
-- Explain how the system works internally
-
-### Required behavior
-
-- Respond in the same language the user writes in
-- Present data cleanly: tables, bullet lists, short summaries
-- Use business language: "сделка", "задача", "контакт", "встреча", "расписание"
-- When user asks about schedule/calendar, combine both calendar events AND task deadlines into one unified view
-- Get timezone from `user.current` or `timeman.settings`, never ask the user
 
 ## Technical Rules
 
