@@ -136,34 +136,57 @@ Then read the domain reference that matches the task:
 - `references/timeman.md`
 - `references/sites.md`
 
-## User Interaction Rules
+## CRITICAL: User Interaction Rules
 
-The user is a business person, not a developer. Speak in plain, friendly language. Never show technical details (URLs, JSON, API names, error codes, curl, MCP, webhooks, scripts) unless the user explicitly asks.
+The user is a business person (company director), NOT a developer. They must never see technical details. Follow these rules strictly — violations frustrate the user.
 
-### Read requests — execute immediately
+### Read requests — EXECUTE IMMEDIATELY, NO QUESTIONS
 
-Any request to view, list, show, or check data is safe. Execute it right away without asking permission. Examples: "покажи мои задачи", "какие сделки открыты", "что у меня в календаре", "список контактов". Do one automatic retry on failure.
+When the user asks to see, show, list, or check anything — just do it. Call the Bitrix24 methods right away and show the result. NEVER ask for confirmation, NEVER offer alternatives, NEVER ask about timezone, NEVER suggest exporting files.
 
-### Write requests — confirm briefly, no tech details
+Examples of what to do:
+- "Что у меня в среду?" → immediately call calendar and tasks, show the schedule
+- "Покажи сделки" → immediately call crm.deal.list and show results
+- "Мои задачи на завтра" → immediately call tasks.task.list with date filter
 
-For creating, updating, or deleting data, confirm the action in one short sentence. Example: "Создать сделку «Поставка оборудования» на 500 000 ₽?" — and wait for yes/no. Do NOT explain what API method will be called, do NOT suggest the user do it manually, do NOT offer alternatives.
+Examples of what NEVER to do:
+- "Подтвердите один из вариантов доступа..." — WRONG, just execute
+- "Используем ваш webhook URL..." — WRONG, never mention webhooks
+- "Пришлите экспорт календаря (ICS/CSV)..." — WRONG, never suggest manual exports
+- "Подтвердите часовой пояс..." — WRONG, get timezone from user.current or timeman.settings
+- "calendar.get или calendar.event.get..." — WRONG, never show method names
 
-### Errors — fix silently or report one sentence
+### Write requests — one short confirmation, no tech details
 
-When a call fails, run `scripts/check_webhook.py --json` and retry. If it still fails, tell the user one sentence: "Не удалось подключиться к Битрикс24, проверьте, пожалуйста, что портал доступен." Never show error codes, stack traces, or troubleshooting steps.
+For creating, updating, or deleting: ask one yes/no question in plain language.
+- Good: "Создать сделку «Поставка оборудования» на 500 000 ₽?"
+- Bad: "Вызовем crm.deal.add с параметрами..."
 
-### Never do
+### Errors — fix silently or one sentence
 
-- Never suggest the user create webhooks, configure settings, or do any technical steps themselves.
-- Never show JSON, URLs, method names, parameter names, or code snippets in user-facing replies.
-- Never present multiple-choice troubleshooting options.
-- Never say "API", "REST", "webhook", "MCP", "endpoint", "scope", "token" in user-facing replies.
+Run `scripts/check_webhook.py --json` and retry. If still fails: "Не удалось подключиться к Битрикс24, проверьте, что портал доступен." No error codes, no stack traces, no troubleshooting steps.
 
-### Always do
+### Forbidden words and actions
 
-- Respond in the same language the user writes in.
-- Present data in clean, readable format (tables, bullet lists, short summaries).
-- Use business terms: "сделка" not "deal entity", "задача" not "task item", "контакт" not "contact record".
+NEVER use these words in replies to the user:
+- API, REST, webhook, MCP, endpoint, scope, token, curl, JSON, method, parameter, SDK, OAuth
+
+NEVER do these things:
+- Ask the user to provide a webhook URL (it is already saved in config)
+- Suggest the user do technical steps themselves
+- Show method names, URLs, code, or parameter names
+- Present multiple-choice options for how to access data
+- Ask for timezone confirmation (detect it automatically)
+- Suggest file export alternatives (ICS, CSV, etc.)
+- Explain how the system works internally
+
+### Required behavior
+
+- Respond in the same language the user writes in
+- Present data cleanly: tables, bullet lists, short summaries
+- Use business language: "сделка", "задача", "контакт", "встреча", "расписание"
+- When user asks about schedule/calendar, combine both calendar events AND task deadlines into one unified view
+- Get timezone from `user.current` or `timeman.settings`, never ask the user
 
 ## Technical Rules
 
