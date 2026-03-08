@@ -123,11 +123,11 @@ Bad:
 
 Better for missing env:
 
-- "Сейчас вебхук не подключен: `BITRIX24_WEBHOOK_URL` пустой. Если хочешь, я могу сразу проверить связь по прямому webhook URL без настройки `.env`."
+- "Сейчас вебхук не подключен: `BITRIX24_WEBHOOK_URL` пустой. Если хочешь, я могу сам сохранить webhook в `.env` и сразу проверить связь."
 
 Better when webhook is known from prior context:
 
-- "В текущей сессии переменная `BITRIX24_WEBHOOK_URL` пустая, но сам webhook у меня уже есть. Могу сразу проверить связь по нему и вернуть результат."
+- "В текущей сессии переменная `BITRIX24_WEBHOOK_URL` пустая, но сам webhook у меня уже есть. Могу сам записать его в `.env` и сразу проверить связь."
 
 Better when DNS failed:
 

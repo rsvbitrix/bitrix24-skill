@@ -145,6 +145,7 @@ Important: do not guess method names from memory when the task is sensitive or t
 - For `imbot.*`, persist and reuse the same `CLIENT_ID`; do not treat it as a public bot identifier.
 - When a webhook call fails, do first-line diagnosis yourself: inspect `BITRIX24_WEBHOOK_URL`, check nearby `.env` files, normalize the URL, probe `user.current.json`, and summarize concrete findings instead of telling the user to run generic checks first.
 - In setup and troubleshooting replies, prefer 2-4 short sentences and one recommended next action, not a long checklist with multiple branches.
+- If the user provides a webhook and asks to configure Bitrix24, offer to save it to `.env` via `scripts/save_webhook.py` and then verify it immediately.
 - Never echo the full webhook secret back to the user; mask it in diagnostics.
 - When the portal-specific configuration matters, verify the exact field names and examples with `bitrix-method-details`.
 - For large or cross-entity operations, prefer batch or dedicated import methods only after checking current docs in MCP.

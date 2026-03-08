@@ -73,6 +73,18 @@ Instead:
 
 Mask the webhook secret in user-facing output.
 
+If the user already shared a webhook and wants you to configure it, prefer doing it yourself:
+
+```bash
+python3 <path-to-skill>/scripts/save_webhook.py --url "https://portal.bitrix24.ru/rest/1/secret/" --check
+```
+
+Important limitation:
+
+- a child process cannot mutate an already running parent shell session
+- but the skill can persist the webhook in `.env`
+- and then use that `.env` for future checks and calls
+
 ## Permissions
 
 Grant the permission groups that match the methods you will call.
@@ -193,4 +205,20 @@ Useful variants:
 python3 <path-to-skill>/scripts/check_webhook.py --json
 python3 <path-to-skill>/scripts/check_webhook.py --env-file .env --json
 python3 <path-to-skill>/scripts/check_webhook.py --url "https://portal.bitrix24.ru/rest/1/secret/"
+```
+
+## Save Webhook
+
+For convenient setup, use:
+
+```bash
+python3 <path-to-skill>/scripts/save_webhook.py --url "https://portal.bitrix24.ru/rest/1/secret/" --check
+```
+
+Useful variants:
+
+```bash
+python3 <path-to-skill>/scripts/save_webhook.py --url "https://portal.bitrix24.ru/rest/1/secret/"
+python3 <path-to-skill>/scripts/save_webhook.py --url "https://portal.bitrix24.ru/rest/1/secret/" --env-file .env.local
+python3 <path-to-skill>/scripts/save_webhook.py --url "https://portal.bitrix24.ru/rest/1/secret/" --force --check
 ```
