@@ -1,6 +1,6 @@
 ---
 name: bitrix24
-description: Work with Bitrix24 (Битрикс24) via REST API and the official Bitrix24 MCP documentation server. Use when OpenClaw or Codex needs to manage CRM deals, contacts, leads, companies, tasks, checklists, comments, calendar events, drive files and folders, chats, notifications, users, departments, webhook setup, OAuth setup, or when it must find the exact Bitrix24 method, event, or article before making a call.
+description: Work with Bitrix24 (Битрикс24) via REST API and the official Bitrix24 MCP documentation server. Use when OpenClaw or Codex needs to manage CRM deals, contacts, leads, companies, tasks, checklists, comments, calendar events, drive files and folders, chats, notifications, users, departments, org structure, projects and workgroups, activity feed, time tracking, work reports, webhook setup, OAuth setup, or when it must find the exact Bitrix24 method, event, or article before making a call.
 metadata:
   openclaw:
     requires:
@@ -45,6 +45,16 @@ metadata:
       - CRM
       - задачи
       - чат
+      - проекты
+      - группы
+      - лента
+      - рабочее время
+      - timeman
+      - socialnetwork
+      - feed
+      - projects
+      - workgroups
+      - org structure
 ---
 
 # Bitrix24
@@ -105,6 +115,9 @@ Then read the domain reference that matches the task:
 - `references/calendar.md`
 - `references/drive.md`
 - `references/users.md`
+- `references/projects.md`
+- `references/feed.md`
+- `references/timeman.md`
 
 ## Rules
 
@@ -133,6 +146,11 @@ Then read the domain reference that matches the task:
 - `references/chat.md` — im, imbot, notifications, dialog history.
 - `references/calendar.md` — sections, events, attendees, availability.
 - `references/drive.md` — storage, folders, files, external links.
-- `references/users.md` — users, departments, org-structure.
+- `references/users.md` — users, departments, org-structure, subordinates.
+- `references/projects.md` — workgroups, projects, scrum, membership.
+- `references/feed.md` — activity stream, feed posts, comments.
+- `references/timeman.md` — time tracking, work day, absence reports, task time.
 
 Read only the reference file that matches the current task.
+
+Note: Bitrix24 has no REST API for reading or sending emails. `mailservice.*` only configures SMTP/IMAP services.
