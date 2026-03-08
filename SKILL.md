@@ -1,6 +1,6 @@
 ---
 name: bitrix24
-description: Work with Bitrix24 (Битрикс24) via REST API and the official Bitrix24 MCP documentation server. Use when OpenClaw or Codex needs to manage CRM deals, contacts, leads, companies, tasks, checklists, comments, calendar events, drive files and folders, chats, notifications, users, departments, org structure, projects and workgroups, activity feed, time tracking, work reports, webhook setup, OAuth setup, or when it must find the exact Bitrix24 method, event, or article before making a call.
+description: Work with Bitrix24 (Битрикс24) via REST API and the official Bitrix24 MCP documentation server. Use when OpenClaw or Codex needs to manage CRM deals, contacts, leads, companies, smart processes, quotes, invoices, products, tasks, checklists, comments, calendar events, drive files and folders, chats, notifications, users, departments, org structure, projects and workgroups, activity feed, time tracking, work reports, landing pages, sites, webhook setup, OAuth setup, or when it must find the exact Bitrix24 method, event, or article before making a call.
 metadata:
   openclaw:
     requires:
@@ -55,6 +55,19 @@ metadata:
       - projects
       - workgroups
       - org structure
+      - smart process
+      - смарт-процесс
+      - products
+      - товары
+      - каталог
+      - quotes
+      - предложения
+      - invoices
+      - счета
+      - landing
+      - sites
+      - сайты
+      - лендинги
 ---
 
 # Bitrix24
@@ -110,6 +123,9 @@ Do not guess method names from memory when the task is sensitive or the method f
 Then read the domain reference that matches the task:
 
 - `references/crm.md`
+- `references/smartprocess.md`
+- `references/products.md`
+- `references/quotes.md`
 - `references/tasks.md`
 - `references/chat.md`
 - `references/calendar.md`
@@ -118,6 +134,7 @@ Then read the domain reference that matches the task:
 - `references/projects.md`
 - `references/feed.md`
 - `references/timeman.md`
+- `references/sites.md`
 
 ## Rules
 
@@ -142,6 +159,9 @@ Then read the domain reference that matches the task:
 - `references/troubleshooting.md` — diagnostics and self-repair.
 - `references/mcp-workflow.md` — MCP tool selection and query patterns.
 - `references/crm.md` — deals, contacts, leads, companies, activities.
+- `references/smartprocess.md` — smart processes, funnels, stages, universal crm.item API.
+- `references/products.md` — product catalog, product rows on deals/quotes/invoices.
+- `references/quotes.md` — quotes (commercial proposals), smart invoices.
 - `references/tasks.md` — tasks, checklists, comments, planner.
 - `references/chat.md` — im, imbot, notifications, dialog history.
 - `references/calendar.md` — sections, events, attendees, availability.
@@ -150,6 +170,7 @@ Then read the domain reference that matches the task:
 - `references/projects.md` — workgroups, projects, scrum, membership.
 - `references/feed.md` — activity stream, feed posts, comments.
 - `references/timeman.md` — time tracking, work day, absence reports, task time.
+- `references/sites.md` — landing pages, sites, blocks, publishing.
 
 Read only the reference file that matches the current task.
 
