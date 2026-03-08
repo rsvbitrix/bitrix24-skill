@@ -4,10 +4,8 @@ description: Work with Bitrix24 (Битрикс24) via REST API and the official
 metadata:
   openclaw:
     requires:
-      env:
-        - BITRIX24_WEBHOOK_URL
       bins:
-        - curl
+        - python3
       mcp:
         - url: https://mcp-dev.bitrix24.tech/mcp
           transport: streamable_http
@@ -17,9 +15,8 @@ metadata:
             - bitrix-method-details
             - bitrix-article-details
             - bitrix-event-details
-    primaryEnv: BITRIX24_WEBHOOK_URL
     emoji: "B24"
-    homepage: https://github.com/rsvbitrix/openclaw-bitrix24
+    homepage: https://github.com/rsvbitrix/bitrix24-skill
     aliases:
       - Bitrix24
       - bitrix24
@@ -54,7 +51,7 @@ metadata:
 
 Use this skill to work with Bitrix24 through two channels:
 
-- direct REST calls through `BITRIX24_WEBHOOK_URL`
+- direct REST calls through a saved Bitrix24 webhook config, with `BITRIX24_WEBHOOK_URL` only as fallback
 - official live documentation lookup through the Bitrix24 MCP server at `https://mcp-dev.bitrix24.tech/mcp`
 
 The baseline used for this update is the previous OpenClaw project at `https://github.com/rsvbitrix/openclaw-bitrix24`, especially its old `skills/bitrix24` module split and setup notes.
@@ -90,9 +87,11 @@ If the user installed some old Bitrix24 skill manually from GitHub or from a loc
 ## Start Here
 
 1. If the user needs setup, credentials, webhook, or OAuth guidance, read `references/access.md`.
-2. If webhook calls fail, env vars look wrong, or setup is unclear, read `references/troubleshooting.md` and run `scripts/check_webhook.py` before asking the user to debug manually.
-3. If the exact Bitrix24 method, event, or article is unknown, read `references/mcp-workflow.md` and search before calling anything.
-4. Then read the domain file that matches the task:
+2. If the user provides a webhook, save it immediately with `scripts/save_webhook.py`.
+3. For actual REST requests, prefer `scripts/bitrix24_call.py` so the skill keeps working even when shell env vars are missing.
+4. If webhook calls fail, setup is unclear, or connectivity looks wrong, read `references/troubleshooting.md` and run `scripts/check_webhook.py` before asking the user to debug manually.
+5. If the exact Bitrix24 method, event, or article is unknown, read `references/mcp-workflow.md` and search before calling anything.
+6. Then read the domain file that matches the task:
    - `references/crm.md`
    - `references/tasks.md`
    - `references/chat.md`
@@ -100,26 +99,34 @@ If the user installed some old Bitrix24 skill manually from GitHub or from a loc
    - `references/drive.md`
    - `references/users.md`
 
-## REST Call Pattern
+## Preferred Call Pattern
 
-Use the webhook URL as a prefix and append `<method>.json`:
+Prefer the bundled caller script because it reads the saved webhook config automatically:
 
 ```bash
-curl -s "${BITRIX24_WEBHOOK_URL}<method>.json" -d '<params>'
+python3 <path-to-skill>/scripts/bitrix24_call.py user.current --json
 ```
 
 Example:
 
 ```bash
-curl -s "${BITRIX24_WEBHOOK_URL}crm.deal.list.json" \
-  -d 'select[]=ID&select[]=TITLE&select[]=STAGE_ID'
+python3 <path-to-skill>/scripts/bitrix24_call.py crm.deal.list \
+  --param 'select[]=ID' \
+  --param 'select[]=TITLE' \
+  --param 'select[]=STAGE_ID' \
+  --json
 ```
 
-`BITRIX24_WEBHOOK_URL` should look like:
+Saved webhook format:
 
 ```text
 https://your-portal.bitrix24.ru/rest/<user_id>/<webhook>/
 ```
+
+Fallback sources still supported:
+
+- `BITRIX24_WEBHOOK_URL`
+- nearby `.env` files
 
 If the task is documentation-only and you only need live lookup through MCP, the MCP server still works even before a webhook is configured.
 
@@ -143,9 +150,9 @@ Important: do not guess method names from memory when the task is sensitive or t
 - Use ISO 8601 date-time strings when a method expects a date-time value.
 - Treat `ACCESS_DENIED`, `insufficient_scope`, `QUERY_LIMIT_EXCEEDED`, and `expired_token` as normal operational cases.
 - For `imbot.*`, persist and reuse the same `CLIENT_ID`; do not treat it as a public bot identifier.
-- When a webhook call fails, do first-line diagnosis yourself: inspect `BITRIX24_WEBHOOK_URL`, check nearby `.env` files, normalize the URL, probe `user.current.json`, and summarize concrete findings instead of telling the user to run generic checks first.
+- When a webhook call fails, do first-line diagnosis yourself: inspect saved webhook config first, then env fallbacks, then probe `user.current.json`.
 - In setup and troubleshooting replies, prefer 2-4 short sentences and one recommended next action, not a long checklist with multiple branches.
-- If the user provides a webhook and asks to configure Bitrix24, offer to save it to `.env` via `scripts/save_webhook.py` and then verify it immediately.
+- If the user provides a webhook and asks to configure Bitrix24, save it immediately with `scripts/save_webhook.py --check`.
 - By default, do not show end users `curl`, `MCP`, `.env`, DNS, JSON escaping, or other implementation details. Talk about connection to Bitrix24 in plain language. Only reveal technical steps if the user explicitly asks for technical details.
 - Do not show webhook URLs, webhook secrets, or even masked secrets in normal user-facing replies. Mention them only if the user explicitly asks for technical debugging details.
 - For safe read-only requests like "show my schedule", "list my tasks", "show deals", or "check connection", execute the request immediately. Do not ask the user whether you should retry, test, or proceed unless the action is risky or blocked.

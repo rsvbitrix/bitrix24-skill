@@ -8,12 +8,13 @@ Do the first diagnosis yourself before asking the user to copy env vars, confirm
 
 Preferred order:
 
-1. inspect current `BITRIX24_WEBHOOK_URL`
-2. inspect nearby `.env` files if needed
-3. validate webhook format
-4. resolve DNS for the host
-5. probe `user.current.json`
-6. report concrete findings and the next fix
+1. inspect saved webhook config
+2. inspect current `BITRIX24_WEBHOOK_URL` only as fallback
+3. inspect nearby `.env` files if needed
+4. validate webhook format
+5. resolve DNS for the host
+6. probe `user.current.json`
+7. report concrete findings and the next fix
 
 Prefer the bundled script:
 
@@ -44,6 +45,7 @@ When you see this:
 
 If `BITRIX24_WEBHOOK_URL` is missing:
 
+- check saved webhook config first
 - check `.env`
 - check `.env.local`
 - check the current workspace root
@@ -51,7 +53,7 @@ If `BITRIX24_WEBHOOK_URL` is missing:
 
 Do not ask the user to retype the webhook until you have checked those places.
 
-If the user already pasted the webhook earlier in the conversation, prefer a direct masked probe and only mention env setup as the follow-up fix.
+If the user already pasted the webhook earlier in the conversation, save it immediately and retry from saved config.
 
 ## Typical Failure: Bad Format
 

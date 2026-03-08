@@ -12,7 +12,7 @@ Use those legacy notes as historical context only. Prefer current MCP docs when 
 
 1. In Bitrix24 open `Developer resources -> Other -> Inbound webhook`.
 2. Create a webhook and copy its URL.
-3. Store it in `BITRIX24_WEBHOOK_URL`.
+3. Save it once in the skill config.
 
 Expected format:
 
@@ -20,11 +20,13 @@ Expected format:
 https://your-portal.bitrix24.ru/rest/<user_id>/<webhook>/
 ```
 
-Use that value as the base prefix for REST calls:
+Preferred setup command:
 
 ```bash
-curl -s "${BITRIX24_WEBHOOK_URL}user.current.json"
+python3 <path-to-skill>/scripts/save_webhook.py --url "https://your-portal.bitrix24.ru/rest/1/secret/" --check
 ```
+
+After that, the skill should reuse the saved webhook automatically.
 
 ## Install and Update Commands
 
@@ -65,8 +67,8 @@ When a user asks for setup help or a REST call fails, do not immediately push ma
 
 Instead:
 
-1. inspect the current `BITRIX24_WEBHOOK_URL` value yourself
-2. check nearby `.env` files if the environment variable is missing
+1. inspect the saved webhook config first
+2. use env vars or nearby `.env` files only as fallback
 3. normalize the webhook URL to ensure it ends with `/`
 4. probe `user.current.json`
 5. only then ask the user for missing information or blocked access
@@ -82,8 +84,8 @@ python3 <path-to-skill>/scripts/save_webhook.py --url "https://portal.bitrix24.r
 Important limitation:
 
 - a child process cannot mutate an already running parent shell session
-- but the skill can persist the webhook in `.env`
-- and then use that `.env` for future checks and calls
+- but the skill can persist the webhook in its own config file
+- and then use that saved config for future checks and calls
 
 ## Permissions
 
@@ -203,7 +205,7 @@ Useful variants:
 
 ```bash
 python3 <path-to-skill>/scripts/check_webhook.py --json
-python3 <path-to-skill>/scripts/check_webhook.py --env-file .env --json
+python3 <path-to-skill>/scripts/check_webhook.py --config-file ~/.config/bitrix24-skill/config.json --json
 python3 <path-to-skill>/scripts/check_webhook.py --url "https://portal.bitrix24.ru/rest/1/secret/"
 ```
 
@@ -219,6 +221,17 @@ Useful variants:
 
 ```bash
 python3 <path-to-skill>/scripts/save_webhook.py --url "https://portal.bitrix24.ru/rest/1/secret/"
+python3 <path-to-skill>/scripts/save_webhook.py --url "https://portal.bitrix24.ru/rest/1/secret/" --config-file ~/.config/bitrix24-skill/config.json
 python3 <path-to-skill>/scripts/save_webhook.py --url "https://portal.bitrix24.ru/rest/1/secret/" --env-file .env.local
 python3 <path-to-skill>/scripts/save_webhook.py --url "https://portal.bitrix24.ru/rest/1/secret/" --force --check
 ```
+
+## Preferred Runtime Path
+
+For actual REST calls, prefer:
+
+```bash
+python3 <path-to-skill>/scripts/bitrix24_call.py user.current --json
+```
+
+This is more stable than relying on the current shell environment.
