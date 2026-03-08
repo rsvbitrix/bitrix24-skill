@@ -51,6 +51,8 @@ If `BITRIX24_WEBHOOK_URL` is missing:
 
 Do not ask the user to retype the webhook until you have checked those places.
 
+If the user already pasted the webhook earlier in the conversation, prefer a direct masked probe and only mention env setup as the follow-up fix.
+
 ## Typical Failure: Bad Format
 
 Expected format:
@@ -110,3 +112,27 @@ Avoid:
 - long generic lists of shell commands for the user
 - asking for confirmation before a simple retry you can do yourself
 - exposing the full webhook secret
+
+## Response Templates
+
+Use short, concrete wording.
+
+Bad:
+
+- "What you need to do now: 1. create env 2. source env 3. run curl 4. or try direct URL 5. or use MCP..."
+
+Better for missing env:
+
+- "Сейчас вебхук не подключен: `BITRIX24_WEBHOOK_URL` пустой. Если хочешь, я могу сразу проверить связь по прямому webhook URL без настройки `.env`."
+
+Better when webhook is known from prior context:
+
+- "В текущей сессии переменная `BITRIX24_WEBHOOK_URL` пустая, но сам webhook у меня уже есть. Могу сразу проверить связь по нему и вернуть результат."
+
+Better when DNS failed:
+
+- "Проблема не в JSON. Хост webhook не резолвится по DNS, поэтому Bitrix24 сейчас недоступен из этой среды. Следующий шаг: проверить домен webhook или сеть."
+
+Better when auth failed:
+
+- "Связь до Bitrix24 есть, но webhook не авторизуется. Скорее всего, секрет неверный или webhook отозван. Следующий шаг: пересоздать webhook и повторить проверку."
