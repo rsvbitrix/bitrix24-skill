@@ -26,6 +26,20 @@ Use that value as the base prefix for REST calls:
 curl -s "${BITRIX24_WEBHOOK_URL}user.current.json"
 ```
 
+## Agent Setup Behavior
+
+When a user asks for setup help or a REST call fails, do not immediately push manual shell steps back to the user.
+
+Instead:
+
+1. inspect the current `BITRIX24_WEBHOOK_URL` value yourself
+2. check nearby `.env` files if the environment variable is missing
+3. normalize the webhook URL to ensure it ends with `/`
+4. probe `user.current.json`
+5. only then ask the user for missing information or blocked access
+
+Mask the webhook secret in user-facing output.
+
 ## Permissions
 
 Grant the permission groups that match the methods you will call.
@@ -131,3 +145,19 @@ For that scenario:
 - save the received `access_token` and `refresh_token`
 - refresh access tokens on your backend
 - do not rely on browser-side JS install helpers for the callback flow
+
+## Quick Probe
+
+For fast diagnosis, prefer the bundled script:
+
+```bash
+python3 <path-to-skill>/scripts/check_webhook.py
+```
+
+Useful variants:
+
+```bash
+python3 <path-to-skill>/scripts/check_webhook.py --json
+python3 <path-to-skill>/scripts/check_webhook.py --env-file .env --json
+python3 <path-to-skill>/scripts/check_webhook.py --url "https://portal.bitrix24.ru/rest/1/secret/"
+```

@@ -62,8 +62,9 @@ The baseline used for this update is the previous OpenClaw project at `https://g
 ## Start Here
 
 1. If the user needs setup, credentials, webhook, or OAuth guidance, read `references/access.md`.
-2. If the exact Bitrix24 method, event, or article is unknown, read `references/mcp-workflow.md` and search before calling anything.
-3. Then read the domain file that matches the task:
+2. If webhook calls fail, env vars look wrong, or setup is unclear, read `references/troubleshooting.md` and run `scripts/check_webhook.py` before asking the user to debug manually.
+3. If the exact Bitrix24 method, event, or article is unknown, read `references/mcp-workflow.md` and search before calling anything.
+4. Then read the domain file that matches the task:
    - `references/crm.md`
    - `references/tasks.md`
    - `references/chat.md`
@@ -114,12 +115,15 @@ Important: do not guess method names from memory when the task is sensitive or t
 - Use ISO 8601 date-time strings when a method expects a date-time value.
 - Treat `ACCESS_DENIED`, `insufficient_scope`, `QUERY_LIMIT_EXCEEDED`, and `expired_token` as normal operational cases.
 - For `imbot.*`, persist and reuse the same `CLIENT_ID`; do not treat it as a public bot identifier.
+- When a webhook call fails, do first-line diagnosis yourself: inspect `BITRIX24_WEBHOOK_URL`, check nearby `.env` files, normalize the URL, probe `user.current.json`, and summarize concrete findings instead of telling the user to run generic checks first.
+- Never echo the full webhook secret back to the user; mask it in diagnostics.
 - When the portal-specific configuration matters, verify the exact field names and examples with `bitrix-method-details`.
 - For large or cross-entity operations, prefer batch or dedicated import methods only after checking current docs in MCP.
 
 ## Domain References
 
 - `references/access.md` for webhook, OAuth, install callback, and legacy source notes.
+- `references/troubleshooting.md` for webhook setup, DNS failures, env loading, and self-diagnostics.
 - `references/mcp-workflow.md` for live docs discovery and tool selection.
 - `references/crm.md` for deals, contacts, leads, companies, activities, and modern `crm.item.*` notes.
 - `references/tasks.md` for tasks, checklists, comments, planner, and deprecated task APIs.
