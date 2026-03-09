@@ -1,10 +1,10 @@
 <!DOCTYPE html>
-<html lang="ru">
+<html lang="en">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>OpenClaw + Bitrix24 — AI-ассистент для вашего бизнеса</title>
-<meta name="description" content="AI-ассистент для Битрикс24 в OpenClaw — CRM, задачи, календарь, автоматические отчёты через обычный чат">
+<title>OpenClaw + Bitrix24 — AI Assistant for Your Business</title>
+<meta name="description" content="AI assistant for Bitrix24 in OpenClaw — CRM, tasks, calendar, automated reports via natural language chat">
 <style>
   :root {
     --b24-blue: #2FC6F6;
@@ -249,12 +249,12 @@
     border-top: 1px solid var(--border);
   }
 
-  /* ===== LANGUAGE TOGGLE (5 languages) ===== */
+  /* ===== LANGUAGE TOGGLE (5 languages, EN default) ===== */
   [data-lang] { display: none !important; }
-  [data-lang="ru"] { display: revert !important; }
+  [data-lang="en"] { display: revert !important; }
 
-  body.lang-en [data-lang] { display: none !important; }
-  body.lang-en [data-lang="en"] { display: revert !important; }
+  body.lang-ru [data-lang] { display: none !important; }
+  body.lang-ru [data-lang="ru"] { display: revert !important; }
 
   body.lang-zh [data-lang] { display: none !important; }
   body.lang-zh [data-lang="zh"] { display: revert !important; }
@@ -281,8 +281,8 @@
 
 <!-- LANGUAGE SWITCHER -->
 <div class="lang-switch">
-  <button class="lang-btn active" data-l="ru" onclick="setLang('ru')">RU</button>
-  <button class="lang-btn" data-l="en" onclick="setLang('en')">EN</button>
+  <button class="lang-btn active" data-l="en" onclick="setLang('en')">EN</button>
+  <button class="lang-btn" data-l="ru" onclick="setLang('ru')">RU</button>
   <button class="lang-btn" data-l="zh" onclick="setLang('zh')">中文</button>
   <button class="lang-btn" data-l="es" onclick="setLang('es')">ES</button>
   <button class="lang-btn" data-l="fr" onclick="setLang('fr')">FR</button>
@@ -889,41 +889,32 @@
 </div>
 
 <footer>
-  <p data-lang="ru">
+  <p>
     <a href="https://github.com/rsvbitrix/bitrix24-skill" target="_blank">GitHub</a> &middot;
     <a href="https://clawhub.com/skills/bitrix24" target="_blank">ClawHub</a> &middot;
     <a href="https://openclaw.com" target="_blank">OpenClaw</a> &middot;
     Bitrix24 Skill v0.14.0
   </p>
-  <p data-lang="en">
-    <a href="https://github.com/rsvbitrix/bitrix24-skill" target="_blank">GitHub</a> &middot;
-    <a href="https://clawhub.com/skills/bitrix24" target="_blank">ClawHub</a> &middot;
-    <a href="https://openclaw.com" target="_blank">OpenClaw</a> &middot;
-    Bitrix24 Skill v0.14.0
+  <p style="margin-top: 12px;" data-lang="en">
+    Created by <b>Sergey R.</b> &middot; Feedback &amp; suggestions: <a href="mailto:sergey.r@me.com">sergey.r@me.com</a>
   </p>
-  <p data-lang="zh">
-    <a href="https://github.com/rsvbitrix/bitrix24-skill" target="_blank">GitHub</a> &middot;
-    <a href="https://clawhub.com/skills/bitrix24" target="_blank">ClawHub</a> &middot;
-    <a href="https://openclaw.com" target="_blank">OpenClaw</a> &middot;
-    Bitrix24 Skill v0.14.0
+  <p style="margin-top: 12px;" data-lang="ru">
+    Автор: <b>Сергей Р.</b> &middot; Пожелания и идеи: <a href="mailto:sergey.r@me.com">sergey.r@me.com</a>
   </p>
-  <p data-lang="es">
-    <a href="https://github.com/rsvbitrix/bitrix24-skill" target="_blank">GitHub</a> &middot;
-    <a href="https://clawhub.com/skills/bitrix24" target="_blank">ClawHub</a> &middot;
-    <a href="https://openclaw.com" target="_blank">OpenClaw</a> &middot;
-    Bitrix24 Skill v0.14.0
+  <p style="margin-top: 12px;" data-lang="zh">
+    作者：<b>Sergey R.</b> &middot; 反馈与建议：<a href="mailto:sergey.r@me.com">sergey.r@me.com</a>
   </p>
-  <p data-lang="fr">
-    <a href="https://github.com/rsvbitrix/bitrix24-skill" target="_blank">GitHub</a> &middot;
-    <a href="https://clawhub.com/skills/bitrix24" target="_blank">ClawHub</a> &middot;
-    <a href="https://openclaw.com" target="_blank">OpenClaw</a> &middot;
-    Bitrix24 Skill v0.14.0
+  <p style="margin-top: 12px;" data-lang="es">
+    Creado por <b>Sergey R.</b> &middot; Comentarios y sugerencias: <a href="mailto:sergey.r@me.com">sergey.r@me.com</a>
+  </p>
+  <p style="margin-top: 12px;" data-lang="fr">
+    Créé par <b>Sergey R.</b> &middot; Retours et suggestions : <a href="mailto:sergey.r@me.com">sergey.r@me.com</a>
   </p>
 </footer>
 
 <script>
 function setLang(lang) {
-  document.body.className = lang === 'ru' ? '' : 'lang-' + lang;
+  document.body.className = lang === 'en' ? '' : 'lang-' + lang;
   document.querySelectorAll('.lang-btn').forEach(b =>
     b.classList.toggle('active', b.dataset.l === lang)
   );
@@ -933,6 +924,13 @@ function copyInstall() {
   document.querySelectorAll('.copy-icon').forEach(el => { el.textContent = '✅'; });
   setTimeout(() => document.querySelectorAll('.copy-icon').forEach(el => { el.textContent = '📋'; }), 2000);
 }
+// Auto-detect browser language
+(function() {
+  var supported = ['en', 'ru', 'zh', 'es', 'fr'];
+  var raw = (navigator.language || navigator.userLanguage || 'en').toLowerCase();
+  var code = raw.substring(0, 2);
+  setLang(supported.indexOf(code) !== -1 ? code : 'en');
+})();
 </script>
 </body>
 </html>
