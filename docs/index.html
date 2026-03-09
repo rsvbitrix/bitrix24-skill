@@ -1,0 +1,419 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Bitrix24 Skill for OpenClaw</title>
+<meta name="description" content="AI assistant for Bitrix24 — manage CRM, tasks, calendar and more through natural language chat">
+<style>
+  :root {
+    --b24-blue: #2FC6F6;
+    --b24-dark: #1B2A4A;
+    --b24-green: #59C98D;
+    --b24-orange: #FFB74D;
+    --b24-red: #EF5350;
+    --bg: #0D1117;
+    --card: #161B22;
+    --border: #21262D;
+    --text: #E6EDF3;
+    --muted: #8B949E;
+  }
+  * { margin:0; padding:0; box-sizing:border-box; }
+  body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Helvetica, Arial, sans-serif; background: var(--bg); color: var(--text); line-height: 1.6; }
+  a { color: var(--b24-blue); text-decoration: none; }
+  a:hover { text-decoration: underline; }
+
+  .hero {
+    text-align: center;
+    padding: 80px 20px 60px;
+    background: linear-gradient(180deg, #0D1117 0%, #161B22 100%);
+  }
+  .hero-logo { font-size: 64px; margin-bottom: 16px; }
+  .hero h1 { font-size: 48px; font-weight: 700; margin-bottom: 12px; }
+  .hero h1 span { color: var(--b24-blue); }
+  .hero p { font-size: 20px; color: var(--muted); max-width: 600px; margin: 0 auto 32px; }
+  .hero-install {
+    display: inline-block;
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 14px 28px;
+    font-family: 'SF Mono', SFMono-Regular, Consolas, monospace;
+    font-size: 18px;
+    color: var(--b24-green);
+    cursor: pointer;
+    transition: border-color 0.2s;
+  }
+  .hero-install:hover { border-color: var(--b24-blue); text-decoration: none; }
+  .hero-install .copy-hint {
+    font-size: 12px;
+    color: var(--muted);
+    margin-top: 4px;
+    font-family: -apple-system, sans-serif;
+  }
+
+  .lang-switch {
+    position: fixed;
+    top: 16px;
+    right: 16px;
+    z-index: 100;
+    display: flex;
+    gap: 4px;
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    padding: 3px;
+  }
+  .lang-btn {
+    padding: 4px 12px;
+    border: none;
+    background: transparent;
+    color: var(--muted);
+    font-size: 14px;
+    border-radius: 4px;
+    cursor: pointer;
+    font-weight: 500;
+  }
+  .lang-btn.active { background: var(--b24-blue); color: #fff; }
+
+  .section { padding: 60px 20px; max-width: 1000px; margin: 0 auto; }
+  .section h2 { font-size: 32px; font-weight: 700; margin-bottom: 32px; text-align: center; }
+
+  .features-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    gap: 16px;
+  }
+  .feature-card {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 24px;
+    transition: border-color 0.2s;
+  }
+  .feature-card:hover { border-color: var(--b24-blue); }
+  .feature-card .icon { font-size: 32px; margin-bottom: 12px; }
+  .feature-card h3 { font-size: 18px; margin-bottom: 8px; }
+  .feature-card p { color: var(--muted); font-size: 14px; }
+
+  .scenarios-table {
+    width: 100%;
+    border-collapse: collapse;
+    background: var(--card);
+    border-radius: 12px;
+    overflow: hidden;
+    border: 1px solid var(--border);
+  }
+  .scenarios-table th, .scenarios-table td { padding: 14px 18px; text-align: left; border-bottom: 1px solid var(--border); }
+  .scenarios-table th { background: #1C2333; color: var(--muted); font-weight: 600; font-size: 13px; text-transform: uppercase; letter-spacing: 0.5px; }
+  .scenarios-table td:first-child { font-family: 'SF Mono', monospace; color: var(--b24-green); font-size: 14px; }
+  .scenarios-table tr:last-child td { border-bottom: none; }
+
+  .schedule-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    gap: 16px;
+  }
+  .schedule-card {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 20px;
+  }
+  .schedule-card .time { color: var(--b24-orange); font-weight: 700; font-size: 14px; margin-bottom: 6px; }
+  .schedule-card h3 { font-size: 16px; margin-bottom: 6px; }
+  .schedule-card p { color: var(--muted); font-size: 14px; }
+
+  .demo-block {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 28px;
+    max-width: 600px;
+    margin: 0 auto;
+  }
+  .demo-msg {
+    margin-bottom: 16px;
+    display: flex;
+    gap: 10px;
+  }
+  .demo-msg .avatar {
+    width: 36px;
+    height: 36px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 18px;
+    flex-shrink: 0;
+  }
+  .demo-msg.user .avatar { background: #2D333B; }
+  .demo-msg.bot .avatar { background: var(--b24-blue); color: #fff; font-size: 14px; font-weight: 700; }
+  .demo-msg .bubble {
+    background: #1C2333;
+    border-radius: 12px;
+    padding: 12px 16px;
+    font-size: 14px;
+    line-height: 1.5;
+    max-width: 440px;
+  }
+  .demo-msg.user .bubble { background: #1A3A5C; }
+  .demo-msg .bubble .highlight { color: var(--b24-orange); }
+  .demo-msg .bubble .warn { color: var(--b24-red); }
+
+  footer {
+    text-align: center;
+    padding: 40px 20px;
+    color: var(--muted);
+    font-size: 14px;
+    border-top: 1px solid var(--border);
+  }
+
+  [data-lang="en"] { display: none !important; }
+  body.en [data-lang="ru"] { display: none !important; }
+  body.en [data-lang="en"] { display: revert !important; }
+
+  @media (max-width: 600px) {
+    .hero h1 { font-size: 32px; }
+    .hero p { font-size: 16px; }
+    .section h2 { font-size: 24px; }
+  }
+</style>
+</head>
+<body>
+
+<div class="lang-switch">
+  <button class="lang-btn active" onclick="setLang('ru')">RU</button>
+  <button class="lang-btn" onclick="setLang('en')">EN</button>
+</div>
+
+<!-- HERO -->
+<div class="hero">
+  <div class="hero-logo">B24</div>
+  <h1 data-lang="ru">Bitrix24 <span>Skill</span></h1>
+  <h1 data-lang="en">Bitrix24 <span>Skill</span></h1>
+  <p data-lang="ru">AI-помощник для Битрикс24 в OpenClaw. Управляйте CRM, задачами, календарём и командой через обычный чат.</p>
+  <p data-lang="en">AI assistant for Bitrix24 in OpenClaw. Manage CRM, tasks, calendar and team through natural language chat.</p>
+  <div class="hero-install" onclick="copyInstall()">
+    clawhub install bitrix24
+    <span class="copy-hint" data-lang="ru">нажмите чтобы скопировать</span>
+    <span class="copy-hint" data-lang="en">click to copy</span>
+  </div>
+</div>
+
+<!-- DEMO -->
+<div class="section">
+  <h2 data-lang="ru">Как это выглядит</h2>
+  <h2 data-lang="en">How it looks</h2>
+  <div class="demo-block">
+    <div class="demo-msg user">
+      <div class="avatar">👤</div>
+      <div class="bubble" data-lang="ru">Что у меня сегодня?</div>
+      <div class="bubble" data-lang="en">What's on my schedule today?</div>
+    </div>
+    <div class="demo-msg bot">
+      <div class="avatar">B24</div>
+      <div class="bubble" data-lang="ru">
+        <b>📅 Встречи:</b><br>
+        09:00 — Планёрка<br>
+        14:00 — Звонок с ООО «Рога и копыта»<br><br>
+        <b>✅ Задачи (дедлайн сегодня):</b><br>
+        • Подготовить КП для клиента<br>
+        • Отправить отчёт<br><br>
+        <span class="warn"><b>⚠️ Просроченные (2):</b></span><br>
+        • Согласовать договор <span class="highlight">(дедлайн был 5 марта)</span><br><br>
+        <span style="color:var(--muted)">💡 Могу перенести встречу или создать задачу.</span>
+      </div>
+      <div class="bubble" data-lang="en">
+        <b>📅 Meetings:</b><br>
+        09:00 — Standup<br>
+        14:00 — Call with Acme Corp<br><br>
+        <b>✅ Tasks (due today):</b><br>
+        • Prepare proposal for client<br>
+        • Send report<br><br>
+        <span class="warn"><b>⚠️ Overdue (2):</b></span><br>
+        • Approve contract <span class="highlight">(was due Mar 5)</span><br><br>
+        <span style="color:var(--muted)">💡 I can reschedule a meeting or create a task.</span>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- FEATURES -->
+<div class="section">
+  <h2 data-lang="ru">Возможности</h2>
+  <h2 data-lang="en">Features</h2>
+  <div class="features-grid">
+    <div class="feature-card">
+      <div class="icon">💰</div>
+      <h3 data-lang="ru">CRM</h3>
+      <h3 data-lang="en">CRM</h3>
+      <p data-lang="ru">Сделки, контакты, компании, лиды. Воронка продаж с суммами. Поиск зависших сделок.</p>
+      <p data-lang="en">Deals, contacts, companies, leads. Sales pipeline with amounts. Find stuck deals.</p>
+    </div>
+    <div class="feature-card">
+      <div class="icon">✅</div>
+      <h3 data-lang="ru">Задачи</h3>
+      <h3 data-lang="en">Tasks</h3>
+      <p data-lang="ru">Список задач, создание, делегирование. Автоматические предупреждения о просрочках.</p>
+      <p data-lang="en">Task lists, creation, delegation. Automatic overdue warnings.</p>
+    </div>
+    <div class="feature-card">
+      <div class="icon">📅</div>
+      <h3 data-lang="ru">Календарь</h3>
+      <h3 data-lang="en">Calendar</h3>
+      <p data-lang="ru">Расписание на день/неделю. Встречи + задачи в одном виде. Подготовка к встречам.</p>
+      <p data-lang="en">Day/week schedule. Meetings + tasks in one view. Meeting preparation.</p>
+    </div>
+    <div class="feature-card">
+      <div class="icon">👥</div>
+      <h3 data-lang="ru">Команда</h3>
+      <h3 data-lang="en">Team</h3>
+      <p data-lang="ru">Статус сотрудников, отделы, структура. Кто чем занят, у кого просрочки.</p>
+      <p data-lang="en">Employee status, departments, org chart. Who's doing what, who's overdue.</p>
+    </div>
+    <div class="feature-card">
+      <div class="icon">💬</div>
+      <h3 data-lang="ru">Чаты</h3>
+      <h3 data-lang="en">Chat</h3>
+      <p data-lang="ru">Сообщения в чат Битрикс24. Уведомления сотрудникам.</p>
+      <p data-lang="en">Messages in Bitrix24 chat. Notifications to employees.</p>
+    </div>
+    <div class="feature-card">
+      <div class="icon">📁</div>
+      <h3 data-lang="ru">Файлы и проекты</h3>
+      <h3 data-lang="en">Files & Projects</h3>
+      <p data-lang="ru">Диск, документы, рабочие группы, рабочее время, лента новостей.</p>
+      <p data-lang="en">Drive, documents, workgroups, time tracking, activity feed.</p>
+    </div>
+  </div>
+</div>
+
+<!-- SCENARIOS -->
+<div class="section">
+  <h2 data-lang="ru">Готовые сценарии</h2>
+  <h2 data-lang="en">Ready-Made Scenarios</h2>
+  <table class="scenarios-table" data-lang="ru">
+    <thead><tr><th>Что сказать</th><th>Что получите</th></tr></thead>
+    <tbody>
+      <tr><td>«Что у меня сегодня?»</td><td>План дня: встречи + задачи + просроченные</td></tr>
+      <tr><td>«Утренний брифинг»</td><td>План дня + сделки + новые лиды</td></tr>
+      <tr><td>«Итоги дня»</td><td>Закрытые задачи, встречи, движение сделок</td></tr>
+      <tr><td>«Воронка»</td><td>Сделки по стадиям, суммы, зависшие</td></tr>
+      <tr><td>«Расскажи про клиента X»</td><td>Контакт + сделки + последние действия</td></tr>
+      <tr><td>«Подготовь к встрече в 14:00»</td><td>Участники, компании, связанные сделки</td></tr>
+      <tr><td>«Как работает отдел?»</td><td>Таблица: сотрудник, задачи, просрочки, статус</td></tr>
+      <tr><td>«Еженедельный отчёт»</td><td>Итоги недели по задачам и сделкам</td></tr>
+    </tbody>
+  </table>
+  <table class="scenarios-table" data-lang="en">
+    <thead><tr><th>What to say</th><th>What you get</th></tr></thead>
+    <tbody>
+      <tr><td>"What's on today?"</td><td>Day plan: meetings + tasks + overdue</td></tr>
+      <tr><td>"Morning briefing"</td><td>Day plan + deals + new leads</td></tr>
+      <tr><td>"End of day summary"</td><td>Completed tasks, meetings, deal movements</td></tr>
+      <tr><td>"Sales pipeline"</td><td>Deals by stage, amounts, stuck deals</td></tr>
+      <tr><td>"Tell me about client X"</td><td>Contact + deals + recent activities</td></tr>
+      <tr><td>"Prep for 2pm meeting"</td><td>Attendees, companies, related deals</td></tr>
+      <tr><td>"How's the team doing?"</td><td>Table: employee, tasks, overdue, status</td></tr>
+      <tr><td>"Weekly report"</td><td>Week summary for tasks and deals</td></tr>
+    </tbody>
+  </table>
+</div>
+
+<!-- AUTOMATIONS -->
+<div class="section">
+  <h2 data-lang="ru">Автоматические уведомления</h2>
+  <h2 data-lang="en">Automated Notifications</h2>
+  <div class="schedule-grid">
+    <div class="schedule-card">
+      <div class="time" data-lang="ru">Будни 08:30</div>
+      <div class="time" data-lang="en">Weekdays 08:30</div>
+      <h3 data-lang="ru">📋 План на день</h3>
+      <h3 data-lang="en">📋 Day Plan</h3>
+      <p data-lang="ru">Встречи и задачи с дедлайном сегодня</p>
+      <p data-lang="en">Meetings and tasks due today</p>
+    </div>
+    <div class="schedule-card">
+      <div class="time" data-lang="ru">Будни 09:00</div>
+      <div class="time" data-lang="en">Weekdays 09:00</div>
+      <h3 data-lang="ru">☀️ Утренний брифинг</h3>
+      <h3 data-lang="en">☀️ Morning Briefing</h3>
+      <p data-lang="ru">План дня + сделки + новые лиды</p>
+      <p data-lang="en">Day plan + deals + new leads</p>
+    </div>
+    <div class="schedule-card">
+      <div class="time" data-lang="ru">Будни 10:00</div>
+      <div class="time" data-lang="en">Weekdays 10:00</div>
+      <h3 data-lang="ru">🚨 Алерт просрочек</h3>
+      <h3 data-lang="en">🚨 Overdue Alert</h3>
+      <p data-lang="ru">Только если есть проблемы. Не спамит.</p>
+      <p data-lang="en">Only when there are issues. No spam.</p>
+    </div>
+    <div class="schedule-card">
+      <div class="time" data-lang="ru">Будни 12:00</div>
+      <div class="time" data-lang="en">Weekdays 12:00</div>
+      <h3 data-lang="ru">🆕 Новые лиды</h3>
+      <h3 data-lang="en">🆕 New Leads</h3>
+      <p data-lang="ru">Лиды за последние 24 часа</p>
+      <p data-lang="en">Leads from the last 24 hours</p>
+    </div>
+    <div class="schedule-card">
+      <div class="time" data-lang="ru">Будни 18:00</div>
+      <div class="time" data-lang="en">Weekdays 18:00</div>
+      <h3 data-lang="ru">📊 Итоги дня</h3>
+      <h3 data-lang="en">📊 Day Summary</h3>
+      <p data-lang="ru">Что сделано: задачи, встречи, сделки</p>
+      <p data-lang="en">What was done: tasks, meetings, deals</p>
+    </div>
+    <div class="schedule-card">
+      <div class="time" data-lang="ru">Пятница 17:00</div>
+      <div class="time" data-lang="en">Friday 17:00</div>
+      <h3 data-lang="ru">📈 Еженедельный отчёт</h3>
+      <h3 data-lang="en">📈 Weekly Report</h3>
+      <p data-lang="ru">Итоги недели по задачам и сделкам</p>
+      <p data-lang="en">Week summary for tasks and deals</p>
+    </div>
+  </div>
+</div>
+
+<!-- INSTALL -->
+<div class="section" style="text-align:center">
+  <h2 data-lang="ru">Установка</h2>
+  <h2 data-lang="en">Installation</h2>
+  <p data-lang="ru" style="color:var(--muted);margin-bottom:24px;font-size:16px">Нужен <a href="https://openclaw.com" target="_blank">OpenClaw</a> и webhook URL от вашего портала Битрикс24</p>
+  <p data-lang="en" style="color:var(--muted);margin-bottom:24px;font-size:16px">Requires <a href="https://openclaw.com" target="_blank">OpenClaw</a> and a webhook URL from your Bitrix24 portal</p>
+  <div class="hero-install" onclick="copyInstall()" style="margin-bottom:16px">
+    clawhub install bitrix24
+  </div>
+  <p data-lang="ru" style="color:var(--muted);font-size:14px">После установки бот сам попросит webhook при первом обращении</p>
+  <p data-lang="en" style="color:var(--muted);font-size:14px">After installation, the bot will ask for webhook on first use</p>
+</div>
+
+<footer>
+  <p data-lang="ru">
+    <a href="https://github.com/rsvbitrix/bitrix24-skill" target="_blank">GitHub</a> &middot;
+    <a href="https://clawhub.com/skills/bitrix24" target="_blank">ClawHub</a> &middot;
+    Bitrix24 Skill v0.14.0
+  </p>
+  <p data-lang="en">
+    <a href="https://github.com/rsvbitrix/bitrix24-skill" target="_blank">GitHub</a> &middot;
+    <a href="https://clawhub.com/skills/bitrix24" target="_blank">ClawHub</a> &middot;
+    Bitrix24 Skill v0.14.0
+  </p>
+</footer>
+
+<script>
+function setLang(lang) {
+  document.body.classList.toggle('en', lang === 'en');
+  document.querySelectorAll('.lang-btn').forEach(b => b.classList.toggle('active', b.textContent === lang.toUpperCase()));
+}
+function copyInstall() {
+  navigator.clipboard.writeText('clawhub install bitrix24');
+  const hints = document.querySelectorAll('.copy-hint');
+  hints.forEach(h => { h.textContent = h.dataset.lang === 'en' ? 'copied!' : 'скопировано!'; });
+  setTimeout(() => hints.forEach(h => { h.textContent = h.dataset.lang === 'en' ? 'click to copy' : 'нажмите чтобы скопировать'; }), 2000);
+}
+</script>
+</body>
+</html>
