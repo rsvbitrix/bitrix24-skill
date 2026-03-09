@@ -31,6 +31,10 @@ Files:
 - `disk.file.uploadversion` — upload new version
 - `disk.file.delete` — delete permanently
 
+Attached objects (files linked to tasks, chats, CRM entities):
+
+- `disk.attachedObject.get` — get info about an attached file (from task, chat, etc.)
+
 Chat handoff:
 
 - `im.disk.file.commit` — send existing Disk file to chat
@@ -78,16 +82,37 @@ python3 scripts/bitrix24_call.py disk.folder.uploadfile \
   --json
 ```
 
+### Get public link for a folder
+
+```bash
+python3 scripts/bitrix24_call.py disk.folder.getexternallink \
+  --param 'id=42' \
+  --json
+```
+
+### Get attached file info (from task, chat, etc.)
+
+```bash
+python3 scripts/bitrix24_call.py disk.attachedObject.get \
+  --param 'id=495' \
+  --json
+```
+
+Returns `OBJECT_ID` (disk file ID), `NAME`, `SIZE`, `DOWNLOAD_URL`, `MODULE_ID`, `ENTITY_TYPE`, `ENTITY_ID`.
+Get the attachment ID from methods like `tasks.task.get` (UF_TASK_WEBDAV_FILES) or chat message files.
+
 ## Working Rules
 
 - Find file IDs from `disk.storage.getchildren` or `disk.folder.getchildren`.
 - Use `disk.file.get` to inspect metadata before download or move.
 - `DOWNLOAD_URL` requires authentication — it's not a public link.
 - Use `disk.folder.getexternallink` for sharing.
+- Use `disk.attachedObject.get` to get info about files attached to tasks or messages.
 
 ## Good MCP Queries
 
 - `disk storage folder file`
 - `disk file upload version`
 - `disk external link`
+- `disk attachedObject get`
 - `im disk file commit`

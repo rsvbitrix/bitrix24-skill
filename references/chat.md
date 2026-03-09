@@ -8,9 +8,13 @@ Use `im.*` for normal IM REST methods (webhook-compatible):
 
 - `im.message.add` — send message
 - `im.message.update` / `im.message.delete`
+- `im.message.share` — create entity (task/event/post) from a message
 - `im.chat.add` / `im.chat.get` / `im.chat.update`
 - `im.chat.user.add` / `im.chat.user.delete` / `im.chat.user.list`
 - `im.dialog.get` / `im.dialog.messages.get`
+- `im.dialog.messages.search` — search messages in a specific chat
+- `im.dialog.users.list` — list dialog participants
+- `im.dialog.read.all` — mark all chats as read
 - `im.recent.list` / `im.recent.get`
 - `im.dialog.writing` — typing indicator
 
@@ -77,6 +81,40 @@ python3 scripts/bitrix24_call.py im.chat.add \
   --json
 ```
 
+### Search messages in a chat
+
+```bash
+python3 scripts/bitrix24_call.py im.dialog.messages.search \
+  --param 'CHAT_ID=42' \
+  --param 'SEARCH_MESSAGE=contract' \
+  --param 'LIMIT=20' \
+  --json
+```
+
+Supports date filters: `DATE_FROM`, `DATE_TO` (ISO 8601), `DATE` (single day).
+Search string must be longer than 2 characters. Returns messages, users, and files.
+
+### Create task from a chat message
+
+```bash
+python3 scripts/bitrix24_call.py im.message.share \
+  --param 'MESSAGE_ID=34261' \
+  --param 'DIALOG_ID=chat42' \
+  --param 'TYPE=TASK' \
+  --json
+```
+
+`TYPE` values: `TASK` (task), `CALEND` (calendar event), `POST` (feed post), `CHAT` (forward to chat).
+Get `MESSAGE_ID` from `im.dialog.messages.get` or `im.dialog.messages.search`.
+
+### Mark all chats as read
+
+```bash
+python3 scripts/bitrix24_call.py im.dialog.read.all --json
+```
+
+No parameters needed. Marks all dialogs as read for the current user.
+
 ## `CLIENT_ID` for Bots
 
 For `imbot.*` methods:
@@ -92,6 +130,9 @@ Bitrix24 chat uses BB-code. Do not double-convert if Markdown is already convert
 ## Good MCP Queries
 
 - `im message add chat`
+- `im message share`
+- `im dialog messages search`
+- `im dialog read all`
 - `imbot message`
 - `im dialog messages get`
 - `im disk file commit`
