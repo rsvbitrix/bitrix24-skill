@@ -1,6 +1,19 @@
 ---
 name: bitrix24
-description: Work with Bitrix24 (Битрикс24) via REST API and the official Bitrix24 MCP documentation server. Use when OpenClaw or Codex needs to manage CRM deals, contacts, leads, companies, smart processes, quotes, invoices, products, tasks, checklists, comments, calendar events, drive files and folders, chats, notifications, users, departments, org structure, projects and workgroups, activity feed, time tracking, work reports, landing pages, sites, webhook setup, OAuth setup, or when it must find the exact Bitrix24 method, event, or article before making a call.
+description: >
+  Work with Bitrix24 (Битрикс24) via REST API and MCP documentation server. Triggers on:
+  CRM — "сделки", "контакты", "лиды", "воронка", "клиенты", "deals", "contacts", "leads", "pipeline";
+  Tasks — "задачи", "мои задачи", "просроченные", "создай задачу", "tasks", "overdue", "to-do";
+  Calendar — "расписание", "встречи", "календарь", "schedule", "meetings", "events";
+  Chat — "чаты", "сообщения", "уведомления", "написать", "notifications", "messages";
+  Projects — "проекты", "рабочие группы", "projects", "workgroups";
+  Time — "рабочее время", "кто на работе", "учёт времени", "timeman", "work status";
+  Drive — "файлы", "документы", "диск", "files", "documents", "drive";
+  Structure — "сотрудники", "отделы", "структура", "подчинённые", "departments", "employees", "org structure";
+  Feed — "лента", "новости", "объявления", "feed", "announcements";
+  Scenarios — "утренний брифинг", "morning briefing", "еженедельный отчёт", "weekly report",
+  "статус команды", "что у меня сегодня", "итоги дня", "план на день", "воронка продаж",
+  "расскажи про клиента", "подготовь к встрече", "как работает отдел".
 metadata:
   openclaw:
     requires:
@@ -186,6 +199,174 @@ Present as:
 3. Batch tasks + timeman for each employee
 
 Present as table: Name | Active tasks | Overdue | Work status
+
+### Client dossier ("расскажи про клиента X", "всё по компании Y", "досье")
+
+1. Find contact/company by name → `crm.contact.list` filter `%LAST_NAME` or `crm.company.list` filter `%TITLE`
+2. Batch:
+```bash
+python3 scripts/bitrix24_batch.py \
+  --cmd 'deals=crm.deal.list?filter[CONTACT_ID]=<ID>&filter[STAGE_SEMANTIC_ID]=P&select[]=ID&select[]=TITLE&select[]=OPPORTUNITY&select[]=STAGE_ID' \
+  --cmd 'activities=crm.activity.list?filter[OWNER_TYPE_ID]=3&filter[OWNER_ID]=<ID>&select[]=ID&select[]=SUBJECT&select[]=DEADLINE&order[DEADLINE]=desc' \
+  --json
+```
+
+Present as:
+- 👤 Контакт — имя, компания, телефон, email
+- 💰 Сделки — список с суммами и стадиями
+- 📋 Последние действия — звонки, письма, встречи
+- 💡 Подсказка: "Могу создать задачу по этому клиенту или запланировать звонок."
+
+### Meeting prep ("подготовь к встрече", "что за встреча в 14:00")
+
+1. Get today's events → `calendar.event.get` for today
+2. Find the matching event by time or name
+3. Get attendee info → `user.get` for each attendee ID
+4. Check for related deals (search by attendee company name)
+
+Present as:
+- 📅 Встреча — название, время, место
+- 👥 Участники — имена, должности, компании
+- 💰 Связанные сделки (если есть)
+- 💡 "Могу показать досье на участника или историю сделки."
+
+### Day results ("итоги дня", "что я сделал", "мой отчёт за день")
+
+```bash
+python3 scripts/bitrix24_batch.py \
+  --cmd 'tasks=tasks.task.list?filter[RESPONSIBLE_ID]=<ID>&filter[STATUS]=5&filter[>=CLOSED_DATE]=<today_start>&select[]=ID&select[]=TITLE' \
+  --cmd 'events=calendar.event.get?type=user&ownerId=<ID>&from=<today_start>&to=<today_end>' \
+  --json
+```
+Also call `crm.stagehistory.list` with `filter[>=CREATED_TIME]=<today_start>` for deal movements.
+
+Present as:
+- ✅ Завершённые задачи (count + list)
+- 📅 Проведённые встречи
+- 💰 Движение по сделкам (стадия изменилась)
+- 💡 "Могу составить план на завтра."
+
+### Sales pipeline ("воронка", "как работает отдел продаж", "продажи")
+
+```bash
+python3 scripts/bitrix24_batch.py \
+  --cmd 'active=crm.deal.list?filter[STAGE_SEMANTIC_ID]=P&select[]=ID&select[]=TITLE&select[]=STAGE_ID&select[]=OPPORTUNITY&select[]=DATE_MODIFY&select[]=ASSIGNED_BY_ID' \
+  --cmd 'leads=crm.lead.list?filter[>=DATE_CREATE]=<week_start>&select[]=ID&select[]=TITLE&select[]=SOURCE_ID&select[]=DATE_CREATE' \
+  --json
+```
+
+Present as:
+- 📊 Воронка — сделки по стадиям с суммами
+- 💤 Зависшие — без движения 14+ дней
+- 🆕 Новые лиды за неделю
+- 💡 "Могу показать детали по сделке или назначить задачу менеджеру."
+
+### Cross-domain search ("найди...", "кто отвечает за...", "все по теме...")
+
+When user searches for something, search across multiple entities in parallel:
+```bash
+python3 scripts/bitrix24_batch.py \
+  --cmd 'contacts=crm.contact.list?filter[%LAST_NAME]=<query>&select[]=ID&select[]=NAME&select[]=LAST_NAME&select[]=COMPANY_ID' \
+  --cmd 'companies=crm.company.list?filter[%TITLE]=<query>&select[]=ID&select[]=TITLE' \
+  --cmd 'deals=crm.deal.list?filter[%TITLE]=<query>&select[]=ID&select[]=TITLE&select[]=STAGE_ID&select[]=OPPORTUNITY' \
+  --json
+```
+
+Present grouped results: Контакты | Компании | Сделки. If only one match — show full details immediately.
+
+---
+
+## Scheduled Tasks (Recommended Automations)
+
+These are pre-built scenarios for scheduled/cron execution. The user can activate them via OpenClaw scheduled tasks.
+
+### Day plan (daily, workdays 08:30)
+
+Build a structured day plan from calendar events and tasks:
+
+```bash
+python3 scripts/bitrix24_batch.py \
+  --cmd 'events=calendar.event.get?type=user&ownerId=<ID>&from=<today_start>&to=<today_end>' \
+  --cmd 'tasks=tasks.task.list?filter[RESPONSIBLE_ID]=<ID>&filter[<=DEADLINE]=<today_end>&filter[<REAL_STATUS]=5&select[]=ID&select[]=TITLE&select[]=DEADLINE&select[]=STATUS&order[DEADLINE]=asc' \
+  --json
+```
+
+Output format:
+```
+📋 План на день — <date>
+
+📅 Встречи:
+  09:00 – Планёрка
+  14:00 – Звонок с ООО «Рога и копыта»
+  16:30 – Обзор проекта
+
+✅ Задачи (дедлайн сегодня):
+  • Подготовить КП для клиента
+  • Отправить отчёт
+
+⚠️ Просроченные:
+  • Согласовать договор (дедлайн был 5 марта)
+```
+
+### Morning briefing (daily, workdays 09:00)
+
+Day plan (above) PLUS active deals summary and new leads from yesterday:
+
+```bash
+python3 scripts/bitrix24_batch.py \
+  --cmd 'events=calendar.event.get?type=user&ownerId=<ID>&from=<today_start>&to=<today_end>' \
+  --cmd 'tasks=tasks.task.list?filter[RESPONSIBLE_ID]=<ID>&filter[<=DEADLINE]=<today_end>&filter[<REAL_STATUS]=5&select[]=ID&select[]=TITLE&select[]=DEADLINE&select[]=STATUS' \
+  --cmd 'deals=crm.deal.list?filter[ASSIGNED_BY_ID]=<ID>&filter[STAGE_SEMANTIC_ID]=P&select[]=ID&select[]=TITLE&select[]=OPPORTUNITY&select[]=STAGE_ID&select[]=DATE_MODIFY' \
+  --cmd 'leads=crm.lead.list?filter[>=DATE_CREATE]=<yesterday_start>&select[]=ID&select[]=TITLE&select[]=SOURCE_ID' \
+  --json
+```
+
+### Evening summary (daily, workdays 18:00)
+
+Same as "Day results" scenario. Summarize completed tasks, past meetings, deal movements.
+
+### Weekly report (Friday 17:00)
+
+Same as "Weekly report" scenario. Tasks completed + deal pipeline changes for the week.
+
+### Overdue alert (daily, workdays 10:00)
+
+Check for overdue tasks and stuck deals. Send ONLY if there are problems (no spam when all is clean):
+
+```bash
+python3 scripts/bitrix24_batch.py \
+  --cmd 'overdue=tasks.task.list?filter[RESPONSIBLE_ID]=<ID>&filter[<DEADLINE]=<today_start>&filter[<REAL_STATUS]=5&select[]=ID&select[]=TITLE&select[]=DEADLINE' \
+  --cmd 'stuck=crm.deal.list?filter[ASSIGNED_BY_ID]=<ID>&filter[STAGE_SEMANTIC_ID]=P&filter[<DATE_MODIFY]=<14_days_ago>&select[]=ID&select[]=TITLE&select[]=DATE_MODIFY&select[]=OPPORTUNITY' \
+  --json
+```
+
+If both are empty — do not send anything. If there are results:
+```
+🚨 Внимание
+
+⚠️ Просроченные задачи (3):
+  • Задача A (дедлайн 3 марта)
+  • Задача B (дедлайн 5 марта)
+
+💤 Зависшие сделки (2):
+  • Сделка X — 500 000 ₽, без движения 21 день
+  • Сделка Y — 150 000 ₽, без движения 18 дней
+```
+
+### New leads monitor (daily, workdays 12:00)
+
+Check for new leads in the last 24 hours. Send only if there are new leads:
+
+```bash
+python3 scripts/bitrix24_call.py crm.lead.list \
+  --param 'filter[>=DATE_CREATE]=<24h_ago>' \
+  --param 'select[]=ID' \
+  --param 'select[]=TITLE' \
+  --param 'select[]=SOURCE_ID' \
+  --param 'select[]=NAME' \
+  --param 'select[]=LAST_NAME' \
+  --json
+```
 
 ---
 
