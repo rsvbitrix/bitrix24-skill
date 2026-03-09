@@ -28,9 +28,8 @@ Create & manage:
 
 List & find:
 
-- `im.recent.list` — list channels (`ONLY_CHANNEL=Y`)
+- `im.recent.list` — list subscribed channels (`ONLY_CHANNEL=Y`)
 - `im.dialog.get` — get channel info (returns `type: openChannel`)
-- `im.search.chat.list` — search channels by name
 - `im.counters.get` — unread counters (includes channel counters)
 
 Messages:
@@ -110,17 +109,6 @@ python3 scripts/bitrix24_call.py im.dialog.get \
 
 Returns object with `type: openChannel`, owner, name, description, subscriber count.
 
-### Search for a channel by name
-
-```bash
-python3 scripts/bitrix24_call.py im.search.chat.list \
-  --param 'FIND=News' \
-  --param 'LIMIT=10' \
-  --json
-```
-
-Returns all matching chats. Filter by `type: openChannel` in results to get channels only.
-
 ### Add subscribers to channel
 
 ```bash
@@ -186,7 +174,21 @@ python3 scripts/bitrix24_call.py im.recent.pin \
 - Use `ONLY_CHANNEL=Y` in `im.recent.list` to filter channels from regular chats.
 - Channel `DIALOG_ID` format: `chatXXX` (same as regular group chats).
 - Subscribers can leave with `im.chat.leave`, but cannot be re-added without owner action.
-- `im.search.chat.list` returns both chats and channels — filter results by `type` field.
+- Channel types in API: `openChannel` (public), `channel` (private), `generalChannel` (company-wide).
+
+## Known Limitations
+
+### Comments and threads
+
+Comments on channel posts are a UI feature not exposed via REST API. When reading messages with `im.dialog.messages.get`, no thread/comment fields are returned (`REPLY_ID`, `THREAD_ID`, `parent_message_id` — none of these are present). `im.message.add` accepts `REPLY_ID` for sending a reply, but replies are not retrievable via API. If Bitrix24 adds REST methods for threads, we can use them immediately.
+
+### Channel discovery
+
+`im.recent.list` with `ONLY_CHANNEL=Y` returns only channels the current user is **subscribed to**. There is no REST API method to discover channels the user is NOT subscribed to (new or available channels on the portal).
+
+`im.search.chat.list` does NOT search channels — it only returns regular chats (`chat`, `open`, `calendar`, `tasks`, `sonetGroup` types). Searching for a known channel name returns zero channel results.
+
+To discover new channels, users must use the Bitrix24 UI. Once subscribed, the channel appears in `im.recent.list`.
 
 ## Good MCP Queries
 
@@ -196,4 +198,3 @@ python3 scripts/bitrix24_call.py im.recent.pin \
 - `im chat user add`
 - `im chat mute`
 - `im recent pin`
-- `im search chat list`
