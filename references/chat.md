@@ -2,6 +2,8 @@
 
 Use this file for messenger dialogs, chats, history, notifications, and file delivery into chats.
 
+> **Channels** (каналы / объявления) — see `references/channels.md`. Channels use the same `im.*` methods but with `ENTITY_TYPE=ANNOUNCEMENT` and `type: openChannel`.
+
 ## Separate `im.*` From `imbot.*`
 
 Use `im.*` for normal IM REST methods (webhook-compatible):

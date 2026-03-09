@@ -6,6 +6,7 @@ description: >
   Tasks — "задачи", "мои задачи", "просроченные", "создай задачу", "tasks", "overdue", "to-do";
   Calendar — "расписание", "встречи", "календарь", "schedule", "meetings", "events";
   Chat — "чаты", "сообщения", "уведомления", "написать", "notifications", "messages";
+  Channels — "каналы", "канал", "объявления", "подписчики", "channels", "announcements", "subscribers";
   Projects — "проекты", "рабочие группы", "projects", "workgroups";
   Time — "рабочее время", "кто на работе", "учёт времени", "timeman", "work status";
   Drive — "файлы", "документы", "диск", "files", "documents", "drive";
@@ -445,6 +446,7 @@ Then read the domain reference that matches the task:
 - `references/quotes.md`
 - `references/tasks.md`
 - `references/chat.md`
+- `references/channels.md`
 - `references/calendar.md`
 - `references/drive.md`
 - `references/users.md`
@@ -480,6 +482,7 @@ These rules are for the agent internally, not for user-facing output.
 - `references/quotes.md` — quotes (commercial proposals), smart invoices.
 - `references/tasks.md` — tasks, checklists, comments, planner.
 - `references/chat.md` — im, imbot, notifications, dialog history.
+- `references/channels.md` — channels (каналы), announcements, subscribers, broadcast messaging.
 - `references/calendar.md` — sections, events, attendees, availability.
 - `references/drive.md` — storage, folders, files, external links.
 - `references/users.md` — users, departments, org-structure, subordinates.
