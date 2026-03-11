@@ -7,6 +7,8 @@ description: >
   Calendar — "расписание", "встречи", "календарь", "schedule", "meetings", "events";
   Chat — "чаты", "сообщения", "уведомления", "написать", "notifications", "messages";
   Channels — "каналы", "канал", "объявления", "подписчики", "channels", "announcements", "subscribers";
+  Open Lines — "открытые линии", "поддержка", "обращения", "клиентские чаты", "операторы",
+  "омниканал", "виджет чата", "open lines", "support", "customer chat", "helpdesk", "operator";
   Projects — "проекты", "рабочие группы", "projects", "workgroups";
   Time — "рабочее время", "кто на работе", "учёт времени", "timeman", "work status";
   Drive — "файлы", "документы", "диск", "files", "documents", "drive";
@@ -78,6 +80,15 @@ metadata:
       - предложения
       - invoices
       - счета
+      - open lines
+      - openlines
+      - imopenlines
+      - открытые линии
+      - поддержка
+      - обращения
+      - операторы
+      - омниканал
+      - helpdesk
       - landing
       - sites
       - сайты
@@ -447,6 +458,7 @@ Then read the domain reference that matches the task:
 - `references/tasks.md`
 - `references/chat.md`
 - `references/channels.md`
+- `references/openlines.md`
 - `references/calendar.md`
 - `references/drive.md`
 - `references/users.md`
@@ -483,6 +495,7 @@ These rules are for the agent internally, not for user-facing output.
 - `references/tasks.md` — tasks, checklists, comments, planner.
 - `references/chat.md` — im, imbot, notifications, dialog history.
 - `references/channels.md` — channels (каналы), announcements, subscribers, broadcast messaging.
+- `references/openlines.md` — open lines (открытые линии), omnichannel customer communication, operators, sessions.
 - `references/calendar.md` — sections, events, attendees, availability.
 - `references/drive.md` — storage, folders, files, external links.
 - `references/users.md` — users, departments, org-structure, subordinates.
