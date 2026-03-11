@@ -75,11 +75,30 @@ ssh slon-mac "export PATH=\$HOME/.nvm/versions/node/*/bin:/opt/homebrew/bin:/usr
 
 ## Publishing Workflow
 
+### Quick publish (recommended)
+
+```bash
+# 1. Update CHANGELOG.md with new version entry
+# 2. Run the publish script:
+bash scripts/publish.sh X.Y.Z
+```
+
+This script automatically:
+- Updates version in `docs/index.html` footer
+- Generates `docs/changelog.json` from CHANGELOG.md
+- Commits, pushes, and publishes to ClawHub
+
+### Manual steps (if needed)
+
 1. Commit and push to `origin/main` (`https://github.com/rsvbitrix/bitrix24-skill.git`)
 2. `npx clawhub publish . --version X.Y.Z` — publishes to ClawHub, triggers security scan (~1-2 min)
 3. Wait ~90 seconds for scan to pass before installing (check with `npx clawhub inspect bitrix24`)
 4. On slon-mac: `npx clawhub install bitrix24 --version X.Y.Z --force` (needs full PATH, see Common Commands)
 5. Restart OpenClaw gateway: `openclaw gateway restart`
+
+### Auto-update
+
+A scheduled task (`bitrix24-auto-update`) checks ClawHub every 2 hours and auto-installs new versions on slon-mac. Manual install is only needed if you want it immediately.
 
 **Known issue:** ClawHub rate-limits install requests. If you get `Rate limit exceeded`, wait 2-3 minutes and retry.
 
