@@ -2,6 +2,32 @@
   "version": "0.15.5",
   "entries": [
     {
+      "version": "0.15.5",
+      "date": "2026-03-11",
+      "items": [
+        {
+          "section": "Added",
+          "title": "Changelog on landing page",
+          "description": "\"What's New\" section loads dynamically from changelog.json"
+        },
+        {
+          "section": "Added",
+          "title": "Publish script",
+          "description": "`scripts/publish.sh` — one command to bump version, generate changelog, push, and publish"
+        },
+        {
+          "section": "Added",
+          "title": "Auto-update system",
+          "description": "scheduled task checks ClawHub every 2 hours and installs new versions automatically"
+        },
+        {
+          "section": "Added",
+          "title": "Version display",
+          "description": "current version shown in footer and changelog badge"
+        }
+      ]
+    },
+    {
       "version": "0.15.4",
       "date": "2026-03-11",
       "items": [

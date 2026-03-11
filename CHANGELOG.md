@@ -1,5 +1,13 @@
 # Changelog
 
+## 0.15.5 — 2026-03-11
+
+### Added
+- **Changelog on landing page**: "What's New" section loads dynamically from changelog.json
+- **Publish script**: `scripts/publish.sh` — one command to bump version, generate changelog, push, and publish
+- **Auto-update system**: scheduled task checks ClawHub every 2 hours and installs new versions automatically
+- **Version display**: current version shown in footer and changelog badge
+
 ## 0.15.4 — 2026-03-11
 
 ### Added
